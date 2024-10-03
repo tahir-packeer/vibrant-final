@@ -1,31 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/Admin/adminDashboard.dart';
-import 'package:flutter_application_1/screens/Admin/productCategory.dart';
-import 'package:flutter_application_1/screens/Customer/customerDashboard.dart';
-import './screens/register.dart'; // Import the RegisterScreen
-import './screens/login.dart'; // Import the LoginScreen
-import 'splash_screen.dart'; // Import the splash screen
+import 'package:provider/provider.dart';
+import 'theme_provider.dart'; // Import the ThemeProvider
+import 'screens/Admin/adminDashboard.dart';
+import 'screens/Admin/productCategory.dart';
+import 'screens/Customer/customerDashboard.dart';
+import './screens/register.dart';
+import './screens/login.dart';
+import 'splash_screen.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Authentication App with Splash Screen',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: SplashScreen(),  // Set SplashScreen as the initial screen
-      routes: {
-        '/login': (context) => LoginScreen(),
-        '/register': (context) => RegisterScreen(),
-        '/customerDashboard': (context) => CustomerDashboard(),
-        '/adminDashboard': (context) => AdminDashboard(),
-        '/productCategory': (context) => ProductCategoryScreen(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Authentication App with Splash Screen',
+          theme: themeProvider.currentTheme,
+          home: SplashScreen(),
+          routes: {
+            '/login': (context) => LoginScreen(),
+            '/register': (context) => RegisterScreen(),
+            '/customerDashboard': (context) => CustomerDashboard(),
+            '/adminDashboard': (context) => AdminDashboard(),
+            '/productCategory': (context) => ProductCategoryScreen(),
+          },
+        );
       },
     );
   }

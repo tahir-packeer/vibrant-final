@@ -45,48 +45,81 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Your Orders"),
+        title: Text("Your Orders", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.deepPurple,
+        elevation: 0,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : orders.isEmpty
-          ? Center(child: Text("You have no orders"))
-          : ListView.builder(
-        itemCount: orders.length,
-        itemBuilder: (context, index) {
-          var order = orders[index];
-          return ListTile(
-            leading: Icon(Icons.shopping_cart),
-            title: Text("Order ID: ${order['id']}"),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ? Center(child: Text("You have no orders", style: TextStyle(fontSize: 18)))
+          : Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView.builder(
+          itemCount: orders.length,
+          itemBuilder: (context, index) {
+            var order = orders[index];
+            return _buildOrderCard(order);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderCard(dynamic order) {
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Product: ${order['product']['name']}"),
-                Text("Quantity: ${order['product_qty']}"),
-                Text("Status: ${order['order_status']}"),
                 Text(
-                  "Total Price: ${order['order_price']}",
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  "Order ID: ${order['id']}",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
+                Icon(Icons.shopping_cart, color: Colors.deepPurple),
               ],
             ),
-            trailing: Icon(Icons.arrow_forward),
-            onTap: () {
-              // Navigate to OrderDetailsScreen when an order is tapped
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => OrderDetailsScreen(
-                    orderId: order['id'],
-                  ),
+            SizedBox(height: 10),
+            Divider(thickness: 2, color: Colors.grey[300]),
+            SizedBox(height: 10),
+            Text("Product: ${order['product']['name']}", style: TextStyle(fontSize: 16)),
+            Text("Quantity: ${order['product_qty']}", style: TextStyle(fontSize: 16)),
+            Text("Status: ${order['order_status']}", style: TextStyle(fontSize: 16)),
+            SizedBox(height: 8),
+            Text(
+              "Total Price: \$${order['order_price']}",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple, // Background color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // Rounded corners
                 ),
-              );
-            },
-          );
-        },
+              ),
+              onPressed: () {
+                // Navigate to OrderDetailsScreen when an order is tapped
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => OrderDetailsScreen(
+                      orderId: order['id'],
+                    ),
+                  ),
+                );
+              },
+              child: Text("View Details", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
       ),
     );
   }
