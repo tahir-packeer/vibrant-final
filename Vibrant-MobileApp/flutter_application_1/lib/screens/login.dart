@@ -19,25 +19,21 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _passwordVisible = false; // Visibility toggle for password
   String _connectionStatus = 'Unknown'; // To display the connection status
   late Connectivity _connectivity;
-  late Stream<List<ConnectivityResult>> _connectivityStream; // Updated to List<ConnectivityResult>
+  late Stream<List<ConnectivityResult>> _connectivityStream;
 
   @override
   void initState() {
     super.initState();
     _connectivity = Connectivity();
-    _connectivityStream = _connectivity.onConnectivityChanged; // Correct stream assignment
+    _connectivityStream = _connectivity.onConnectivityChanged;
 
-    // Check the initial connection status
     _checkConnectivity();
 
-    // Listen to connectivity changes
     _connectivityStream.listen((List<ConnectivityResult> resultList) {
       if (resultList.isNotEmpty) {
-        // We take the first result as the current network state
         _updateConnectionStatus(resultList.first);
       } else {
-        _updateConnectionStatus(
-            ConnectivityResult.none); // No connection if the list is empty
+        _updateConnectionStatus(ConnectivityResult.none);
       }
     });
   }
@@ -64,8 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> loginUser() async {
     if (_connectionStatus == 'No Internet Connection') {
-      showSnackbarMessage(
-          context, 'Please check your internet connection.', false);
+      showSnackbarMessage(context, 'Please check your internet connection.', false);
       return;
     }
 
@@ -73,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true; // Show loading spinner
     });
 
-    final url = Uri.parse('${API_BASE_URL}/login'); // Use the global API base URL
+    final url = Uri.parse('${API_BASE_URL}/login');
 
     final response = await http.post(
       url,
@@ -93,13 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
       final String userType = data['user']['user_type'];
       final int userId = data['user']['id'];
 
-      // Store the user_id globally for access across pages
       globalUserId = userId;
 
-      // Show a success message
       showSnackbarMessage(context, "Login successful!", true);
 
-      // Navigate based on user type
       if (userType == 'customer') {
         Navigator.pushReplacement(
           context,
@@ -112,8 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } else {
-      final errorMessage =
-          json.decode(response.body)['message'] ?? 'Login failed';
+      final errorMessage = json.decode(response.body)['message'] ?? 'Login failed';
       showSnackbarMessage(context, errorMessage, false);
     }
   }
@@ -136,157 +127,145 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Image.asset(
               'assets/gym.jpg', // Add your background image here
               fit: BoxFit.cover,
+              //image transparency
             ),
           ),
-          Center(
-            child: SingleChildScrollView(
-              child: Padding(
+          Column(
+            children: [
+              Spacer(), // Push the content to the bottom
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'CustomTeez',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white, // Changed to white for better contrast
-                      ),
-                    ),
-                    SizedBox(height: 20),
-
-                    // Network Status Display
-                    Text(
-                      'Network Status: $_connectionStatus',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _connectionStatus == 'No Internet Connection'
-                            ? Colors.red
-                            : Colors.green,
-                      ),
-                    ),
-
-                    SizedBox(height: 20),
-
-                    // Form Box with Background and Rounded Corners
-                    Container(
-                      padding: const EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.8), // Slight opacity for form background
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'Email',
-                              style: TextStyle(fontSize: 16, color: Colors.black),
+                child: Container(
+                  padding: const EdgeInsets.all(25.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.95), // Opaque background
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        // Email Field
+                        Text(
+                          'Email Address',
+                          style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                        TextFormField(
+                          decoration: InputDecoration(
+                            hintText: 'Enter email address',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey), // Set border color to grey
                             ),
-                            TextFormField(
-                              decoration: InputDecoration(
-                                hintText: 'Enter email',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _email = value;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 16),
+
+                        // Password Field
+                        Text(
+                          'Password',
+                          style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                        TextFormField(
+                          decoration: InputDecoration(
+                            hintText: 'Enter Password',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                               ),
-                              onChanged: (value) {
+                              onPressed: () {
                                 setState(() {
-                                  _email = value;
+                                  _passwordVisible = !_passwordVisible;
                                 });
                               },
                             ),
-                            SizedBox(height: 16),
-                            Text(
-                              'Password',
-                              style: TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                            TextFormField(
-                              decoration: InputDecoration(
-                                hintText: 'Enter Password',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _passwordVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _passwordVisible = !_passwordVisible;
-                                    });
-                                  },
-                                ),
+                          ),
+                          obscureText: !_passwordVisible, // Toggle password visibility
+                          onChanged: (value) {
+                            setState(() {
+                              _password = value;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 16),
+
+                        // Forgot Password Link
+                        SizedBox(height: 16),
+
+                        // Login Button
+                        _isLoading
+                            ? Center(child: CircularProgressIndicator())
+                            : SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black, // Black for button
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              obscureText: !_passwordVisible, // Toggle password visibility
-                              onChanged: (value) {
-                                setState(() {
-                                  _password = value;
-                                });
-                              },
                             ),
-                            SizedBox(height: 20),
-                            _isLoading
-                                ? Center(child: CircularProgressIndicator())
-                                : SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                  Color.fromARGB(255, 121, 60, 158), // Purple color for the button
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    loginUser();
-                                  }
-                                },
-                                child: Text('LOG IN',
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                loginUser();
+                              }
+                            },
+                            child: Text('LOG IN',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white)),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+
+                        // Register Now Text
+                        SizedBox(
+                          width: double.infinity,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(context, '/register');
+                            },
+                            child: RichText(
+                              text: TextSpan(
+                                text: "Don't have an account? ",
+                                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                                children: [
+                                  TextSpan(
+                                    text: 'Register now',
                                     style: TextStyle(
-                                        fontSize: 16, color: Colors.white)),
+                                      color: Colors.grey.shade700,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    SizedBox(height: 16),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/register');
-                      },
-                      child: RichText(
-                        text: TextSpan(
-                          text: "Don't have an account? ",
-                          style: TextStyle(color: Colors.white),
-                          children: [
-                            TextSpan(
-                              text: 'Register now',
-                              style: TextStyle(
-                                color: Colors.blue,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              SizedBox(height: 16), // Add space at the bottom
+            ],
           ),
         ],
       ),
