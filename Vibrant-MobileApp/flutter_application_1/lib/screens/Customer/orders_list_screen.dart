@@ -114,7 +114,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
             SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDarkTheme ? CustomColors.cardColorDark : CustomColors.cardColorLight, // Set button color
+                backgroundColor: isDarkTheme ? CustomColors.cardColorDark : CustomColors.textColorDark, // Set button color
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

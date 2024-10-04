@@ -8,6 +8,6 @@ class CustomColors {
   static const Color cardColorLight = Colors.white; // Button color in light mode (white)
   static const Color cardColorDark = Colors.black; // Button color in dark mode (black)
   static const Color backgroundColorLight = Colors.black;
-  static const Color secondaryColor = Color(0xFF2196F3);
+  static const Color secondaryColor = Colors.white;
   static const Color secondaryColorDark = Color(0xFF1976D2);
 }

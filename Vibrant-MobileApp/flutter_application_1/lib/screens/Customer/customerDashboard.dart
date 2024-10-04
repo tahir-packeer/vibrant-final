@@ -101,21 +101,18 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_bag_rounded),
+          icon: Icon(Icons.shopping_bag_outlined),
           label: 'Cart',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.gif_box),
+          icon: Icon(Icons.shopping_bag),
           label: 'Orders',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Profile',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
-          label: 'Customizations',
-        ),
+
       ],
       currentIndex: _selectedIndex,
       unselectedItemColor: Colors.grey,

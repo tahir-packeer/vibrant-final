@@ -97,9 +97,18 @@ class _CartScreenState extends State<CartScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Bag',
-          style: TextStyle(color: isDarkTheme ? CustomColors.cardColorDark : CustomColors.textColorLight, fontWeight: FontWeight.bold,),
+        title: Row(
+          children: [
+            Icon(Icons.shopping_bag, color: isDarkTheme ? CustomColors.cardColorDark : CustomColors.textColorLight),
+            SizedBox(width: 8),
+            Text(
+              'Bag',
+              style: TextStyle(
+                color: isDarkTheme ? CustomColors.cardColorDark : CustomColors.textColorLight,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         centerTitle: true,
         backgroundColor: isDarkTheme ? CustomColors.primaryColor : CustomColors.primaryColor,
@@ -114,7 +123,7 @@ class _CartScreenState extends State<CartScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color:  !isDarkTheme ? CustomColors.cardColorDark : CustomColors.textColorLight,
+            color:  !isDarkTheme ? CustomColors.textColorLight : CustomColors.cardColorDark,
           ),
         ),
 
@@ -340,11 +349,13 @@ class _CartScreenState extends State<CartScreen> {
             },
             child: Text(
               "CHECKOUT",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
+                color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorDark,
+              ),
             ),
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-              backgroundColor: isDarkTheme ? CustomColors.secondaryColorDark : CustomColors.primaryColor,
+              padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
+              backgroundColor: isDarkTheme ? CustomColors.cardColorDark : CustomColors.primaryColorDark,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
