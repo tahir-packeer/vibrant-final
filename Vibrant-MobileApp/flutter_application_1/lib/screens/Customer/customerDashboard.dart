@@ -56,7 +56,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text("Vibrant"),
+      title: Text("Vibrant",),
       actions: [
         IconButton(
           icon: Icon(_isDarkMode ? Icons.brightness_3 : Icons.wb_sunny),

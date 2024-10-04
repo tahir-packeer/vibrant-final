@@ -99,9 +99,10 @@ class _CartScreenState extends State<CartScreen> {
       appBar: AppBar(
         title: Text(
           'Bag',
-          style: TextStyle(color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+          style: TextStyle(color: isDarkTheme ? CustomColors.cardColorDark : CustomColors.textColorLight, fontWeight: FontWeight.bold,),
         ),
-        backgroundColor: isDarkTheme ? CustomColors.primaryColorDark : CustomColors.primaryColor,
+        centerTitle: true,
+        backgroundColor: isDarkTheme ? CustomColors.primaryColor : CustomColors.primaryColor,
         elevation: 0,
       ),
       body: isLoading
@@ -110,8 +111,13 @@ class _CartScreenState extends State<CartScreen> {
           ? Center(
         child: Text(
           'Your Cart is empty',
-          style: TextStyle(fontSize: 18, color: isDarkTheme ? CustomColors.textColorLight : CustomColors.textColorDark),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color:  !isDarkTheme ? CustomColors.cardColorDark : CustomColors.textColorLight,
+          ),
         ),
+
       )
           : Padding(
         padding: const EdgeInsets.all(16.0),

@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'order_details_screen.dart'; // Import the order details screen
-import '../../global.dart'; // Import global variables like userID and API_BASE_URL
+import 'package:provider/provider.dart'; // Import provider
+import '../../custom_colors.dart';
+import '../../theme_provider.dart'; // Ensure this imports the correct ThemeProvider
+import 'order_details_screen.dart';
+import '../../global.dart';
 
 class OrdersListScreen extends StatefulWidget {
   @override
@@ -15,13 +18,13 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
 
   // Function to fetch the user's orders
   Future<void> fetchOrders() async {
-    final String apiUrl = "${API_BASE_URL}/orders/byuser/$globalUserId"; // Fetch orders by user ID
+    final String apiUrl = "${API_BASE_URL}/orders/byuser/$globalUserId";
     try {
       final response = await http.get(Uri.parse(apiUrl));
 
       if (response.statusCode == 200) {
         setState(() {
-          orders = json.decode(response.body).reversed.toList(); // Reverse the list so new orders are at the top
+          orders = json.decode(response.body).reversed.toList();
           isLoading = false;
         });
       } else {
@@ -35,19 +38,29 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     }
   }
 
-
   @override
   void initState() {
     super.initState();
-    fetchOrders(); // Fetch orders when the screen is initialized
+    fetchOrders();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Get the theme provider
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkTheme = themeProvider.isDarkTheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("Your Orders", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.deepPurple,
+        title: Text(
+          'Your Orders',
+          style: TextStyle(
+            color: isDarkTheme ? CustomColors.cardColorLight : CustomColors.textColorLight,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: isDarkTheme ? CustomColors.primaryColorDark : CustomColors.primaryColor,
         elevation: 0,
       ),
       body: isLoading
@@ -60,14 +73,14 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
           itemCount: orders.length,
           itemBuilder: (context, index) {
             var order = orders[index];
-            return _buildOrderCard(order);
+            return _buildOrderCard(order, isDarkTheme);
           },
         ),
       ),
     );
   }
 
-  Widget _buildOrderCard(dynamic order) {
+  Widget _buildOrderCard(dynamic order, bool isDarkTheme) { // Pass isDarkTheme as a parameter
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -84,30 +97,29 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   "Order ID: ${order['id']}",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                Icon(Icons.shopping_cart, color: Colors.deepPurple),
+                Icon(Icons.shopping_cart, color: Colors.grey),
               ],
             ),
             SizedBox(height: 10),
             Divider(thickness: 2, color: Colors.grey[300]),
             SizedBox(height: 10),
-            Text("Product: ${order['product']['name']}", style: TextStyle(fontSize: 16)),
-            Text("Quantity: ${order['product_qty']}", style: TextStyle(fontSize: 16)),
+            Text("${order['product']['name']}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text("Qty: ${order['product_qty']}", style: TextStyle(fontSize: 16)),
             Text("Status: ${order['order_status']}", style: TextStyle(fontSize: 16)),
             SizedBox(height: 8),
             Text(
-              "Total Price: \$${order['order_price']}",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+              "Total: \Rs ${order['order_price']}",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
             ),
             SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple, // Background color
+                backgroundColor: isDarkTheme ? CustomColors.cardColorDark : CustomColors.cardColorLight, // Set button color
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Rounded corners
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
               onPressed: () {
-                // Navigate to OrderDetailsScreen when an order is tapped
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -117,8 +129,16 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   ),
                 );
               },
-              child: Text("View Details", style: TextStyle(color: Colors.white)),
+              child: Text(
+                "View Details",
+                style: TextStyle(
+                  color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight, // Set text color
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
+
           ],
         ),
       ),
