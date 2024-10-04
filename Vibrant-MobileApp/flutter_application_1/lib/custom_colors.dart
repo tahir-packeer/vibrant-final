@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomColors {
   static const Color primaryColor = Color(0xFF1976D2);
-  static const Color primaryColorDark = Color(0xFF1565C0);
+  static const Color primaryColorDark = Color(0xFF000000);
   static const Color textColorLight = Colors.black;
   static const Color textColorDark = Colors.white;
   static const Color cardColorLight = Colors.white;

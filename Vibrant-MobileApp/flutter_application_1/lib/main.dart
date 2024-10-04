@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'theme_provider.dart'; // Import the ThemeProvider
-import 'screens/Admin/adminDashboard.dart';
-import 'screens/Admin/productCategory.dart';
+import 'theme_provider.dart';
 import 'screens/Customer/customerDashboard.dart';
 import './screens/register.dart';
 import './screens/login.dart';
@@ -31,8 +29,6 @@ class MyApp extends StatelessWidget {
             '/login': (context) => LoginScreen(),
             '/register': (context) => RegisterScreen(),
             '/customerDashboard': (context) => CustomerDashboard(),
-            '/adminDashboard': (context) => AdminDashboard(),
-            '/productCategory': (context) => ProductCategoryScreen(),
           },
         );
       },

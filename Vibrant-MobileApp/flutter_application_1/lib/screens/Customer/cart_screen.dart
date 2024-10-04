@@ -150,6 +150,9 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCartItemCard(dynamic cartItem, bool isDarkTheme) {
+    double discount = cartItem['promotion'] ?? 0; // Fetching promotion/discount data.
+    bool hasDiscount = discount > 0;
+
     return Card(
       elevation: 2,
       margin: EdgeInsets.symmetric(vertical: 8),
@@ -157,6 +160,7 @@ class _CartScreenState extends State<CartScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
@@ -180,37 +184,72 @@ class _CartScreenState extends State<CartScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (hasDiscount) ...[
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        "${discount}% OFF",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                  ],
                   Text(
                     cartItem['product_name'],
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+                    ),
                   ),
                   SizedBox(height: 4),
                   Text(
                     "Size: ${cartItem['size']}",
-                    style: TextStyle(fontSize: 14, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+                    ),
                   ),
                   SizedBox(height: 4),
                   Row(
                     children: [
+                      if (hasDiscount)
+                        Text(
+                          "\$${cartItem['original_price']}",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      SizedBox(width: hasDiscount ? 8 : 0),
                       Text(
                         "\$${cartItem['item_price']}",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
-                      ),
-                      SizedBox(width: 8),
-                      if (cartItem['discount_price'] != null)
-                        Text(
-                          "\$${cartItem['discount_price']}",
-                          style: TextStyle(fontSize: 14, color: Colors.grey, decoration: TextDecoration.lineThrough),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
                         ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 4),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
                         "Qty: ",
-                        style: TextStyle(fontSize: 14, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+                        ),
                       ),
                       IconButton(
                         icon: Icon(Icons.remove, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
@@ -232,25 +271,23 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    "Total: \$${cartItem['total_price']}",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
-                  ),
                 ],
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                deleteCartItem(cartItem['id']);
-              },
+            Text(
+              "Total: \$${cartItem['total_price']}",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
 
   Widget _buildCartTotal(bool isDarkTheme) {
     return Padding(

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../login.dart';
-import 'OrderFormScreen.dart';
 import 'productDetailScreen.dart';
 import 'orders_list_screen.dart';
 import 'profile_screen.dart';
@@ -16,7 +15,7 @@ class CustomerDashboard extends StatefulWidget {
 }
 
 class MyColors {
-  static const Color primaryColor = Color(0xFF1976D2); // Custom blue color
+  static const Color primaryColor = Color(0xFF000000); // Custom blue color
 }
 
 class _CustomerDashboardState extends State<CustomerDashboard> {
@@ -25,10 +24,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   static List<Widget> _screens = <Widget>[
     CustomerDashboardContent(),
+    CartScreen(),
     OrdersListScreen(),
     ProfileScreen(),
     CustomizationsScreen(),
-    CartScreen(), // Adding CartScreen to the screens list
   ];
 
   void _onItemTapped(int index) {
@@ -57,7 +56,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text("Customer Dashboard"),
+      title: Text("Vibrant"),
       actions: [
         IconButton(
           icon: Icon(_isDarkMode ? Icons.brightness_3 : Icons.wb_sunny),
@@ -102,6 +101,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_cart),
+          label: 'Cart',
+        ),
+        BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag),
           label: 'Orders',
         ),
@@ -113,16 +116,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           icon: Icon(Icons.settings),
           label: 'Customizations',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart),
-          label: 'Cart',
-        ),
       ],
       currentIndex: _selectedIndex,
       unselectedItemColor: Colors.grey,
       selectedItemColor: MyColors.primaryColor,
       backgroundColor: Colors.white,
-      elevation: 5,
       onTap: _onItemTapped,
     );
   }
@@ -137,7 +135,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
 class CustomerDashboardContent extends StatefulWidget {
   @override
-  _CustomerDashboardContentState createState() => _CustomerDashboardContentState();
+  _CustomerDashboardContentState createState() =>
+      _CustomerDashboardContentState();
 }
 
 class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
@@ -197,7 +196,9 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
       filteredProducts = query.isEmpty
           ? products
           : products.where((product) {
-        return product['name'].toLowerCase().contains(query.toLowerCase());
+        return product['name']
+            .toLowerCase()
+            .contains(query.toLowerCase());
       }).toList();
     });
   }
@@ -272,41 +273,79 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
       child: Card(
         margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
         elevation: 4,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Expanded(
-              child: Image.network(
-                "http://10.0.2.2:8000${product['image']}",
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Center(child: Icon(Icons.broken_image));
-                },
+            // Background image
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: Image.network(
+                  "http://10.0.2.2:8000${product['image']}",
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(child: Icon(Icons.broken_image));
+                  },
+                ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                product['name'],
-                style: TextStyle(fontWeight: FontWeight.bold),
+            // Gradient for readability
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                "Promo: \$${product['promotion_price']?.toString() ?? '0.00'}",
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            // Text content overlay
+            Positioned(
+              bottom: 16.0,
+              left: 16.0,
+              right: 16.0,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product['name'],
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "\$${product['item_price']?.toString() ?? '0.00'}",
+                        style: TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                      Text(
+                        "Promo: \$${product['promotion_price']?.toString() ?? '0.00'}",
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text("Was: \$${product['item_price']?.toString() ?? '0.00'}"),
             ),
           ],
         ),
       ),
     );
   }
+
 
   Widget _buildProductGrid(Orientation orientation) {
     return filteredProducts.isEmpty
@@ -316,54 +355,165 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
       shrinkWrap: true,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
-        crossAxisSpacing: 10.0,
+        crossAxisSpacing: 5.0,
         mainAxisSpacing: 10.0,
         childAspectRatio: 0.75,
       ),
       itemCount: filteredProducts.length,
       itemBuilder: (context, index) {
         var product = filteredProducts[index];
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProductDetailScreen(
-                  productId: product['id'],
-                ),
-              ),
-            );
-          },
-          child: Card(
-            elevation: 4,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Image.network(
-                    "http://10.0.2.2:8000${product['image']}",
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Center(child: Icon(Icons.broken_image));
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    product['name'],
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text("Price: \$${product['item_price']}"),
-                ),
-              ],
+        return _buildProductCard(product);
+      },
+    );
+  }
+
+  Widget _buildProductCard(dynamic product) {
+    // Parse the original and promotional prices
+    double? originalPrice = double.tryParse(product['item_price'].toString());
+    double? promoPrice = double.tryParse(product['promotion_price']?.toString() ?? '0');
+
+    // Calculate the discount percentage only if a valid promotion is present
+    double? discountPercent = originalPrice != null && promoPrice != null && promoPrice < originalPrice
+        ? ((originalPrice - promoPrice) / originalPrice * 100).roundToDouble()
+        : null;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailScreen(
+              productId: product['id'],
             ),
           ),
         );
       },
+      child: Card(
+        margin: EdgeInsets.all(4.0),
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Stack(
+          children: [
+            // Product Image with rounded corners
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10.0),
+              child: Image.network(
+                "http://10.0.2.2:8000${product['image']}",
+                fit: BoxFit.cover,
+                height: double.infinity,
+                width: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Center(child: Icon(Icons.broken_image));
+                },
+              ),
+            ),
+            // Dark Gradient Overlay for text readability
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                ),
+              ),
+            ),
+            // Text Content over the Image
+            Positioned(
+              bottom: 16.0,
+              left: 8.0,
+              right: 8.0,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product Name
+                  Text(
+                    product['name'],
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 4.0),
+                  // Product Price and Promotion Price
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Show promo price if it exists, otherwise show original price only
+                      if (promoPrice != null && promoPrice < originalPrice!)
+                        Text(
+                          "\$${promoPrice.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                          ),
+                        )
+                      else
+                        Text(
+                          "\$${originalPrice?.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      // Show original price only if promo price exists and is lower
+                      if (promoPrice != null )
+                        Text(
+                          "\$${originalPrice?.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color: Colors.grey[300],
+                            decoration: TextDecoration.lineThrough,
+                            fontSize: 14.0,
+                          ),
+                        ),
+                    ],
+                  ),
+                  // Product Rating
+                  Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.amber, size: 16.0),
+                      SizedBox(width: 4.0),
+                      Text(
+                        "5.0",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Discount Badge in the Top Left Corner
+            if (discountPercent != null)
+              Positioned(
+                top: 8.0,
+                left: 8.0,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: Text(
+                    "${discountPercent.toStringAsFixed(0)}% OFF",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

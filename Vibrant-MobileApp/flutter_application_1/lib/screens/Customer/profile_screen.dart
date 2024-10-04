@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:battery_plus/battery_plus.dart'; // Battery package
+import 'package:image_picker/image_picker.dart';  // Image picker package
 import '../../global.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -23,18 +24,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   File? _profileImage;
   CameraController? _cameraController;
-  late List<CameraDescription> cameras;
   Map<String, dynamic>? userProfile;
 
   // Battery related
   Battery _battery = Battery();
   int _batteryLevel = 0;
 
+  // Image picker instance
+  final ImagePicker _picker = ImagePicker();
+
   @override
   void initState() {
     super.initState();
     fetchUserProfile();
-    _initCamera();
     _getBatteryLevel();
   }
 
@@ -126,49 +128,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  Future<void> _initCamera() async {
-    cameras = await availableCameras();
-    if (cameras.isNotEmpty) {
-      _cameraController = CameraController(cameras[0], ResolutionPreset.high);
-      await _cameraController!.initialize();
-      setState(() {});
+  // Open gallery to select image
+  Future<void> _pickImageFromGallery() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      // Save the image to local storage
+      await _saveImageToFile(image);
     }
   }
 
-  bool isCapturing = false; // Flag to track capture state
-
-  Future<void> _captureImage() async {
-    if (isCapturing) {
-      // Prevent new capture if one is already in progress
-      print("Previous capture has not returned yet.");
-      return;
-    }
-
+  // Open camera to capture image
+  Future<void> _captureImageFromCamera() async {
     PermissionStatus status = await Permission.camera.request();
     if (status.isGranted) {
-      try {
-        if (_cameraController != null && _cameraController!.value.isInitialized) {
-          setState(() {
-            isCapturing = true; // Mark capture as in progress
-          });
-
-          final XFile image = await _cameraController!.takePicture();
-          setState(() {
-            _profileImage = File(image.path);
-          });
-        }
-      } catch (e) {
-        print("Error capturing image: $e");
-      } finally {
-        setState(() {
-          isCapturing = false; // Reset the flag after capture is completed
-        });
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        // Save the image to local storage
+        await _saveImageToFile(image);
       }
     } else {
       print("Camera permission denied");
     }
   }
 
+  Future<void> _saveImageToFile(XFile imageFile) async {
+    try {
+      // Get the application documents directory
+      final directory = await getApplicationDocumentsDirectory();
+
+      // Define a unique file name, for example, based on timestamp
+      final fileName = path.basename(imageFile.path); // Extract filename
+      final filePath = path.join(directory.path, fileName); // Create full file path
+
+      // Copy the file to the app's documents directory
+      final savedImage = await File(imageFile.path).copy(filePath);
+
+      // Set the saved image path as the profile image
+      setState(() {
+        _profileImage = savedImage;
+      });
+
+      print('Image saved to: $filePath');
+    } catch (e) {
+      print('Error saving image: $e');
+    }
+  }
+
+  Future<void> _uploadImage(File imageFile) async {
+    final String uploadUrl = "${API_BASE_URL}/upload_profile_image/$globalUserId";
+
+    var request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
+
+    // Attach the image file to the request
+    request.files.add(await http.MultipartFile.fromPath('profile_image', imageFile.path));
+
+    try {
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        print('Image uploaded successfully');
+      } else {
+        print('Failed to upload image');
+      }
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -205,7 +230,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Center(
               child: GestureDetector(
-                onTap: _captureImage,
+                onTap: () {
+                  _showImageSourceDialog(context);
+                },
                 child: CircleAvatar(
                   radius: 50,
                   backgroundImage: _profileImage != null
@@ -281,12 +308,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ? CircularProgressIndicator()
                     : Text("Save Changes"),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  minimumSize: Size(double.infinity, 50),
+                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 ),
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showImageSourceDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Select Image Source"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _captureImageFromCamera();
+            },
+            child: Text("Camera"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _pickImageFromGallery();
+            },
+            child: Text("Gallery"),
+          ),
+        ],
       ),
     );
   }
