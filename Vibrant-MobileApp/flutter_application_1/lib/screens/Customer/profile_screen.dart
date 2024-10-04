@@ -245,9 +245,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Align(
                     alignment: Alignment.bottomRight,
                     child: Icon(
-                      Icons.camera_alt,
+                      Icons.camera_alt_outlined,
                       size: 28,
-                      color: Colors.white,
+                      color: Colors.grey[600],
                     ),
                   ),
                 ),

@@ -101,11 +101,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart),
+          icon: Icon(Icons.shopping_bag_rounded),
           label: 'Cart',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_bag),
+          icon: Icon(Icons.gif_box),
           label: 'Orders',
         ),
         BottomNavigationBarItem(
