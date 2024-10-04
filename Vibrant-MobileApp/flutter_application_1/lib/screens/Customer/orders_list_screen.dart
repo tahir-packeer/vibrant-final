@@ -21,7 +21,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
 
       if (response.statusCode == 200) {
         setState(() {
-          orders = json.decode(response.body); // Assuming API returns a list of orders in 'data'
+          orders = json.decode(response.body).reversed.toList(); // Reverse the list so new orders are at the top
           isLoading = false;
         });
       } else {
@@ -34,6 +34,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
       });
     }
   }
+
 
   @override
   void initState() {

@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../global.dart';
-import 'customerDashboard.dart'; // import your global constants like API_BASE_URL
+import 'customerDashboard.dart';
+import 'orders_list_screen.dart'; // import your global constants like API_BASE_URL
 
 class OrderFormScreen extends StatefulWidget {
   final List<Map<String, dynamic>> orderDetails;
@@ -33,12 +34,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
     // Prepare the order payload
     Map<String, dynamic> orderPayload = {
-      'user_id': 1,  // Replace this with actual user_id from user authentication
+      'user_id': globalUserId, // Ensure you're using the actual logged-in user's ID
       'user_name': _nameController.text,
       'user_address': _addressController.text,
-      'payment_status': 'Paid',  // Set it dynamically based on the payment status
+      'payment_status': 'Paid',
       'order_status': 'Order Placed',
-      'products': widget.orderDetails,  // Product details with id and quantity
+      'products': widget.orderDetails,
     };
 
     try {
@@ -52,25 +53,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         // Order placed successfully
         print("Order placed successfully");
 
-        // Show a success dialog
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Success'),
-            content: Text('Your order has been placed successfully!'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                  // Navigate to the CustomerDashboard page
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => CustomerDashboard()),
-                  );
-                },
-                child: Text('OK'),
-              ),
-            ],
+        // Navigate back to the orders list and refresh
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => CustomerDashboard(), // This will refresh the orders
           ),
         );
       } else {
@@ -78,7 +64,6 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       }
     } catch (error) {
       print("Error placing order: $error");
-      // Show an error dialog
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -98,6 +83,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

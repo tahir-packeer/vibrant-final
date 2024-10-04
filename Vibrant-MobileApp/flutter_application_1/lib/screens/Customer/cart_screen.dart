@@ -110,7 +110,7 @@ class _CartScreenState extends State<CartScreen> {
           ? Center(
         child: Text(
           'Your Cart is empty',
-          style: TextStyle(fontSize: 18, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+          style: TextStyle(fontSize: 18, color: isDarkTheme ? CustomColors.textColorLight : CustomColors.textColorDark),
         ),
       )
           : Padding(
@@ -301,7 +301,7 @@ class _CartScreenState extends State<CartScreen> {
           ),
           SizedBox(height: 10),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               List<Map<String, dynamic>> orderDetails = cartItems.map((item) {
                 return {
                   'product_id': item['product_id'],
@@ -310,7 +310,8 @@ class _CartScreenState extends State<CartScreen> {
                 };
               }).toList();
 
-              Navigator.push(
+              // Navigate to order form to complete the order
+              final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => OrderFormScreen(
@@ -319,8 +320,22 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                 ),
               );
+
+              // After successful order placement, clear the cart
+              if (result == true) {
+                setState(() {
+                  cartItems.clear();
+                  cartTotal = 0.0;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Order placed successfully. Cart cleared!')),
+                );
+              }
             },
-            child: Text("CHECKOUT SECURELY", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: Text(
+              "CHECKOUT",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               backgroundColor: isDarkTheme ? CustomColors.secondaryColorDark : CustomColors.primaryColor,
@@ -330,6 +345,7 @@ class _CartScreenState extends State<CartScreen> {
               textStyle: TextStyle(fontSize: 16, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
             ),
           ),
+
         ],
       ),
     );
