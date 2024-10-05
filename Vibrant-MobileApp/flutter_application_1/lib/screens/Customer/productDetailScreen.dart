@@ -171,7 +171,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 15, horizontal: 130),
-                  backgroundColor: product!['quantity'] > 0 ? Colors.black : Colors.red, 
+                  backgroundColor: product!['quantity'] > 0 ? Colors.black : Colors.red,
                 ),
               ),
             ),
