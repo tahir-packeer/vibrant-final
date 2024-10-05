@@ -145,28 +145,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               style: TextStyle(fontSize: 16),
             ),
             Spacer(),
-            ElevatedButton(
-              onPressed: product!['quantity'] > 0
-                  ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OrderFormScreen(
-                      productId: widget.productId,
-                      productName: product!['name'],
-                      availableQuantity: product!['quantity'],
+            Center(
+              child: ElevatedButton(
+                onPressed: product!['quantity'] > 0
+                    ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OrderFormScreen(
+                        productId: widget.productId,
+                        productName: product!['name'],
+                        availableQuantity: product!['quantity'],
+                      ),
                     ),
+                  );
+                }
+                    : null,
+                child: Text(
+                  product!['quantity'] > 0 ? "Order Now" : "Out of Stock",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: product!['quantity'] > 0 ? Colors.white : Colors.red,
+                    fontWeight: FontWeight.bold,
                   ),
-                );
-              }
-                  : null, // Disable the button if quantity is 0
-              child: Text(
-                product!['quantity'] > 0 ? "Order Now" : "Out of Stock", // Change button text based on quantity
-              ),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 135),
-                backgroundColor: product!['quantity'] > 0 ? Colors.black : Colors.red, // Black if in stock, red if out of stock
-                textStyle: TextStyle(fontSize: 18, color: isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 130),
+                  backgroundColor: product!['quantity'] > 0 ? Colors.black : Colors.red, 
+                ),
               ),
             ),
           ],
