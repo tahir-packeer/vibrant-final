@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../../custom_colors.dart';
 import 'order_form_screen.dart'; // Import the order form screen
 import '../../global.dart'; // import the global variables
 
@@ -16,6 +17,9 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Map<String, dynamic>? product;
   bool isLoading = true;
+
+
+
 
   // Function to fetch product details by ID
   Future<void> fetchProductDetails() async {
@@ -46,6 +50,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: Text('Product Details'),
@@ -141,7 +146,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
             Spacer(),
             ElevatedButton(
-              onPressed: () {
+              onPressed: product!['quantity'] > 0
+                  ? () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -152,12 +158,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                 );
-              },
-              child: Text("Order Now"),
+              }
+                  : null, // Disable the button if quantity is 0
+              child: Text(
+                product!['quantity'] > 0 ? "Order Now" : "Out of Stock", // Change button text based on quantity
+              ),
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(
-                    vertical: 15, horizontal: 20),
-                textStyle: TextStyle(fontSize: 18),
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 135),
+                backgroundColor: product!['quantity'] > 0 ? Colors.black : Colors.red, // Black if in stock, red if out of stock
+                textStyle: TextStyle(fontSize: 18, color: isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight),
               ),
             ),
           ],

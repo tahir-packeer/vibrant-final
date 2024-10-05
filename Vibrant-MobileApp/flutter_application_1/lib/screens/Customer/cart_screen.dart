@@ -98,22 +98,29 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.shopping_bag, color: isDarkTheme ? CustomColors.cardColorDark : CustomColors.textColorLight),
-            SizedBox(width: 8),
+            Icon(
+              Icons.shopping_bag_outlined,
+              color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,  // Icon color based on theme
+            ),
+            SizedBox(width: 8), // Space between the icon and the text
             Text(
               'Bag',
               style: TextStyle(
-                color: isDarkTheme ? CustomColors.cardColorDark : CustomColors.textColorLight,
+                color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight, // Text color based on theme
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
         centerTitle: true,
-        backgroundColor: isDarkTheme ? CustomColors.primaryColor : CustomColors.primaryColor,
+        backgroundColor: isDarkTheme ? CustomColors.primaryColorDark : CustomColors.primaryColorLight,  // Background color based on theme
         elevation: 0,
       ),
+
+
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : cartItems.isEmpty

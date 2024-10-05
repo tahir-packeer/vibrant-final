@@ -117,7 +117,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       selectedItemColor: _isDarkMode
           ? CustomColors.primaryColor
           : CustomColors.primaryColorDark,
-      backgroundColor: Colors.white,
       onTap: _onItemTapped,
     );
   }
