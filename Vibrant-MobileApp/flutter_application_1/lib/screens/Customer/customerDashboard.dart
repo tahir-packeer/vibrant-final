@@ -1,21 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/custom_colors.dart';
 import 'package:http/http.dart' as http;
 import '../login.dart';
 import 'productDetailScreen.dart';
 import 'orders_list_screen.dart';
 import 'profile_screen.dart';
-import 'customizations_screen.dart';
 import '../../global.dart';
 import 'cart_screen.dart';
 
 class CustomerDashboard extends StatefulWidget {
   @override
   _CustomerDashboardState createState() => _CustomerDashboardState();
-}
-
-class MyColors {
-  static const Color primaryColor = Color(0xFF000000); // Custom blue color
 }
 
 class _CustomerDashboardState extends State<CustomerDashboard> {
@@ -27,8 +23,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     CartScreen(),
     OrdersListScreen(),
     ProfileScreen(),
-    CustomizationsScreen(),
   ];
+
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -40,6 +37,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   Widget build(BuildContext context) {
     var orientation = MediaQuery.of(context).orientation;
 
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return MaterialApp(
       themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: _buildLightTheme(),
@@ -116,7 +114,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       ],
       currentIndex: _selectedIndex,
       unselectedItemColor: Colors.grey,
-      selectedItemColor: MyColors.primaryColor,
+      selectedItemColor: _isDarkMode
+          ? CustomColors.primaryColor
+          : CustomColors.primaryColorDark,
       backgroundColor: Colors.white,
       onTap: _onItemTapped,
     );

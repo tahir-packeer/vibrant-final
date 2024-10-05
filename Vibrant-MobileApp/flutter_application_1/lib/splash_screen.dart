@@ -10,8 +10,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Navigate to the next screen after a delay
-    Timer(Duration(seconds: 5), () {
+    Timer(Duration(seconds: 6), () {
       Navigator.of(context).pushReplacementNamed('/login');
     });
   }
@@ -22,14 +21,14 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.white, // Set the background color to white
+        color: Colors.white,
         child: Center(
           child: SizedBox(
-            width: 150, // Set the width you want for the GIF
-            height: 150, // Set the height you want for the GIF
+            width: 180,
+            height: 180,
             child: Image.asset(
-              'assets/splashlogo.gif', // Replace with your GIF image file
-              fit: BoxFit.contain, // Makes the GIF fit within the defined size
+              'assets/splashlogo.gif',
+              fit: BoxFit.contain,
             ),
           ),
         ),
