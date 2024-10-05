@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../custom_colors.dart';
-import '../../global.dart'; 
+import '../../global.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
   final int orderId;
@@ -102,8 +102,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ),
             Divider(color: isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight, thickness: 1),
             SizedBox(height: 8),
-            _buildStatusRow("Order Status:", orderDetails!['order']['order_status'], Colors.redAccent, isDarkMode),
-            _buildStatusRow("Total Price:", "Rs ${orderDetails!['order']['order_price']}", Colors.greenAccent, isDarkMode),
+            _buildStatusRow("Order Status:", orderDetails!['order']['order_status'], Colors.redAccent, isDarkMode,),
+            _buildStatusRow("Total Price:", "Rs ${orderDetails!['order']['order_price']}", Colors.green.shade400, isDarkMode),
             SizedBox(height: 8),
             Text(
               "Quantity: ${orderDetails!['order']['product_qty']}",
@@ -158,7 +158,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   "Deliverer Name: ${orderDetails!['deliverer']['deliverer_name']}",
                   style: TextStyle(fontSize: 16, color: isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight),
                 ),
-                _buildStatusRow("Delivery Status:", orderDetails!['deliverer']['delivery_status'], Colors.greenAccent, isDarkMode),
+                _buildStatusRow("Delivery Status:", orderDetails!['deliverer']['delivery_status'], Colors.green.shade400, isDarkMode),
                 SizedBox(height: 8),
                 Text(
                   "Delivery Note: ${orderDetails!['deliverer']['delivery_note']}",
