@@ -10,7 +10,6 @@ import '../../global.dart';
 import 'cart_screen.dart';
 import 'dart:async';
 
-
 class CustomerDashboard extends StatefulWidget {
   @override
   _CustomerDashboardState createState() => _CustomerDashboardState();
@@ -67,14 +66,14 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           icon: ColorFiltered(
             colorFilter: ColorFilter.mode(
               _isDarkMode
-                  ? CustomColors.primaryColorLight // Black for light mode
-                  : CustomColors.primaryColorDark, // White for dark mode
+                  ? CustomColors.primaryColorLight
+                  : CustomColors.primaryColorDark,
               BlendMode.srcIn,
             ),
             child: Image.asset(
               'assets/logout.png',
-              width: 25, // Set the desired width
-              height: 25, // Set the desired height
+              width: 25,
+              height: 25,
             ),
           ),
           onPressed: () {
@@ -154,6 +153,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   PageController _pageController = PageController();
   int _currentPromotionIndex = 0;
   Timer? _promotionTimer;
+  double _opacity = 1.0; // Opacity for fade effect
 
   @override
   void initState() {
@@ -170,17 +170,35 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   }
 
   void _startPromotionTimer() {
-    _promotionTimer = Timer.periodic(Duration(seconds: 3), (timer) {
-      if (_currentPromotionIndex < promotionalProducts.length - 1) {
-        _currentPromotionIndex++;
-      } else {
-        _currentPromotionIndex = 0;
-      }
-      _pageController.animateToPage(
-        _currentPromotionIndex,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+    _promotionTimer = Timer.periodic(Duration(seconds: 6), (timer) {
+      // Fade out
+      setState(() {
+        _opacity = 0.0;
+      });
+
+      // Delay for the fade out
+      Future.delayed(Duration(milliseconds: 500), () {
+        // Increment the promotion index
+        if (_currentPromotionIndex < promotionalProducts.length - 1) {
+          _currentPromotionIndex++;
+        } else {
+          _currentPromotionIndex = 0; // Loop back to the first
+        }
+
+        // Animate to the next page with sliding effect to the right
+        _pageController.animateToPage(
+          _currentPromotionIndex,
+          duration: Duration(milliseconds: 1000), // Slower transition
+          curve: Curves.easeInOut,
+        );
+
+        // Fade in
+        Future.delayed(Duration(milliseconds: 40), () {
+          setState(() {
+            _opacity = 0.2;
+          });
+        });
+      });
     });
   }
 
@@ -276,7 +294,11 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
         },
         itemBuilder: (context, index) {
           var product = promotionalProducts[index];
-          return _buildPromotionCard(product);
+          return AnimatedOpacity(
+            opacity: _opacity,
+            duration: Duration(milliseconds: 500), // Duration of the fade effect
+            child: _buildPromotionCard(product),
+          );
         },
       ),
     );
