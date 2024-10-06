@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart'; // Import the connectivity package
 import '../global.dart'; // import the global variables
 import './Customer/customerDashboard.dart'; // import the CustomerDashboard page
-import './Admin/adminDashboard.dart'; // import the AdminDashboard page
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -100,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else if (userType == 'admin') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => AdminDashboard()),
+          MaterialPageRoute(builder: (context) => CustomerDashboard()),
         );
       }
     } else {
