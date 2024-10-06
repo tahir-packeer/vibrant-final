@@ -78,6 +78,7 @@ flutter:
     - assets/gym.jpg
     - assets/splashlogo.gif
     - assets/logo-splash.gif
+    - assets/logout.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

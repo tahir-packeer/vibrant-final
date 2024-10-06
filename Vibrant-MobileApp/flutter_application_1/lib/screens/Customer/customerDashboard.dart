@@ -8,6 +8,8 @@ import 'orders_list_screen.dart';
 import 'profile_screen.dart';
 import '../../global.dart';
 import 'cart_screen.dart';
+import 'dart:async';
+
 
 class CustomerDashboard extends StatefulWidget {
   @override
@@ -25,8 +27,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     ProfileScreen(),
   ];
 
-
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -37,7 +37,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   Widget build(BuildContext context) {
     var orientation = MediaQuery.of(context).orientation;
 
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return MaterialApp(
       themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: _buildLightTheme(),
@@ -54,7 +53,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text("Vibrant",),
+      title: Text("Vibrant"),
       actions: [
         IconButton(
           icon: Icon(_isDarkMode ? Icons.brightness_3 : Icons.wb_sunny),
@@ -65,7 +64,19 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           },
         ),
         IconButton(
-          icon: Icon(Icons.logout),
+          icon: ColorFiltered(
+            colorFilter: ColorFilter.mode(
+              _isDarkMode
+                  ? CustomColors.primaryColorLight // Black for light mode
+                  : CustomColors.primaryColorDark, // White for dark mode
+              BlendMode.srcIn,
+            ),
+            child: Image.asset(
+              'assets/logout.png',
+              width: 25, // Set the desired width
+              height: 25, // Set the desired height
+            ),
+          ),
           onPressed: () {
             _logout(context);
           },
@@ -110,7 +121,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           icon: Icon(Icons.person),
           label: 'Profile',
         ),
-
       ],
       currentIndex: _selectedIndex,
       unselectedItemColor: Colors.grey,
@@ -143,17 +153,35 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   String searchQuery = "";
   PageController _pageController = PageController();
   int _currentPromotionIndex = 0;
+  Timer? _promotionTimer;
 
   @override
   void initState() {
     super.initState();
     fetchProducts();
+    _startPromotionTimer();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _promotionTimer?.cancel();
     super.dispose();
+  }
+
+  void _startPromotionTimer() {
+    _promotionTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (_currentPromotionIndex < promotionalProducts.length - 1) {
+        _currentPromotionIndex++;
+      } else {
+        _currentPromotionIndex = 0;
+      }
+      _pageController.animateToPage(
+        _currentPromotionIndex,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   Future<void> fetchProducts() async {
@@ -271,7 +299,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
         elevation: 4,
         child: Stack(
           children: [
-            // Background image
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10.0),
@@ -284,7 +311,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 ),
               ),
             ),
-            // Gradient for readability
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -296,7 +322,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 ),
               ),
             ),
-            // Text content overlay
             Positioned(
               bottom: 16.0,
               left: 16.0,
@@ -342,7 +367,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
     );
   }
 
-
   Widget _buildProductGrid(Orientation orientation) {
     return filteredProducts.isEmpty
         ? Center(child: Text('No products found.'))
@@ -364,11 +388,9 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   }
 
   Widget _buildProductCard(dynamic product) {
-    // Parse the original and promotional prices
     double? originalPrice = double.tryParse(product['item_price'].toString());
     double? promoPrice = double.tryParse(product['promotion_price']?.toString() ?? '0');
 
-    // Calculate the discount percentage only if a valid promotion is present
     double? discountPercent = originalPrice != null && promoPrice != null && promoPrice < originalPrice
         ? ((originalPrice - promoPrice) / originalPrice * 100).roundToDouble()
         : null;
@@ -392,7 +414,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
         ),
         child: Stack(
           children: [
-            // Product Image with rounded corners
             ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
               child: Image.network(
@@ -405,7 +426,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 },
               ),
             ),
-            // Dark Gradient Overlay for text readability
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -417,7 +437,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 ),
               ),
             ),
-            // Text Content over the Image
             Positioned(
               bottom: 16.0,
               left: 8.0,
@@ -425,7 +444,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product Name
                   Text(
                     product['name'],
                     style: TextStyle(
@@ -437,14 +455,12 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4.0),
-                  // Product Price and Promotion Price
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Show promo price if it exists, otherwise show original price only
                       if (promoPrice != null && promoPrice < originalPrice!)
                         Text(
-                          "\$${promoPrice.toStringAsFixed(2)}",
+                          "\Rs ${promoPrice.toStringAsFixed(2)}",
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -453,17 +469,16 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                         )
                       else
                         Text(
-                          "\$${originalPrice?.toStringAsFixed(2)}",
+                          "\Rs ${originalPrice?.toStringAsFixed(2)}",
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 16.0,
                           ),
                         ),
-                      // Show original price only if promo price exists and is lower
-                      if (promoPrice != null )
+                      if (promoPrice != null)
                         Text(
-                          "\$${originalPrice?.toStringAsFixed(2)}",
+                          "\Rs ${originalPrice?.toStringAsFixed(2)}",
                           style: TextStyle(
                             color: Colors.grey[300],
                             decoration: TextDecoration.lineThrough,
@@ -472,7 +487,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                         ),
                     ],
                   ),
-                  // Product Rating
                   Row(
                     children: [
                       Icon(Icons.star, color: Colors.amber, size: 16.0),
@@ -486,7 +500,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 ],
               ),
             ),
-            // Discount Badge in the Top Left Corner
             if (discountPercent != null)
               Positioned(
                 top: 8.0,
