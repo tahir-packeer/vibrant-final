@@ -8,7 +8,11 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:battery_plus/battery_plus.dart'; // Battery package
 import 'package:image_picker/image_picker.dart';  // Image picker package
+import 'package:provider/provider.dart';
+import '../../custom_colors.dart';
 import '../../global.dart';
+import '../../theme_provider.dart';
+import '../login.dart'; // Import the login screen
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -174,25 +178,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _uploadImage(File imageFile) async {
-    final String uploadUrl = "${API_BASE_URL}/upload_profile_image/$globalUserId";
-
-    var request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
-
-    // Attach the image file to the request
-    request.files.add(await http.MultipartFile.fromPath('profile_image', imageFile.path));
-
-    try {
-      final response = await request.send();
-
-      if (response.statusCode == 200) {
-        print('Image uploaded successfully');
-      } else {
-        print('Failed to upload image');
-      }
-    } catch (e) {
-      print('Error uploading image: $e');
-    }
+  void _logout(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+          (Route<dynamic> route) => false,
+    );
   }
 
   @override
@@ -203,20 +193,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkTheme = themeProvider.isDarkTheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Your Profile"),
+        title: Text(
+          'Profile',
+          style: TextStyle(
+            color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: isDarkTheme ? CustomColors.primaryColorDark : CustomColors.primaryColorLight,
+        elevation: 0,
         actions: [
           IconButton(
             icon: Icon(isEditing ? Icons.check : Icons.edit),
-            onPressed: isEditing
-                ? () {
-              updateUserProfile();
-            }
-                : () {
-              setState(() {
-                isEditing = true;
-              });
+            color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+            onPressed: () {
+              if (isEditing) {
+                updateUserProfile(); // Call the update function
+              } else {
+                setState(() {
+                  isEditing = true; // Enable editing mode
+                });
+              }
             },
           ),
         ],
@@ -238,10 +240,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundImage: _profileImage != null
                       ? (_profileImage!.existsSync()
                       ? FileImage(_profileImage!)
-                      : NetworkImage(
-                      "http://10.0.2.2:8000${userProfile!['profile_image']}"))
-                      : AssetImage('assets/default_profile.png')
-                  as ImageProvider,
+                      : NetworkImage("http://10.0.2.2:8000${userProfile!['profile_image']}"))
+                      : AssetImage('assets/default_profile.png') as ImageProvider,
                   child: Align(
                     alignment: Alignment.bottomRight,
                     child: Icon(
@@ -263,6 +263,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               enabled: isEditing,
               decoration: InputDecoration(
                 hintText: 'Enter your name',
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
             SizedBox(height: 20),
@@ -275,6 +281,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               enabled: isEditing,
               decoration: InputDecoration(
                 hintText: 'Enter your email',
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
             SizedBox(height: 20),
@@ -309,8 +321,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     : Text("Save Changes"),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  _logout(context);
+                },
+                child: Text(
+                  "LOG OUT",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isDarkTheme ? Colors.black : Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDarkTheme ? Colors.white : Colors.black, // Change color based on theme
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -321,21 +358,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Select Image Source"),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0), // Rounded corners
+        ),
+        title: Text(
+          "Select Image Source",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18.0,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _captureImageFromCamera();
             },
-            child: Text("Camera"),
+            child: Text(
+              "Camera",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _pickImageFromGallery();
             },
-            child: Text("Gallery"),
+            child: Text(
+              "Gallery",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),

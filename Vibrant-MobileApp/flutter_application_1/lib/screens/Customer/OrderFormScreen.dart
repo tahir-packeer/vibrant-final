@@ -56,7 +56,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         // Navigate back to the orders list and refresh
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => CustomerDashboard(), // This will refresh the orders
+            builder: (context) => CustomerDashboard(),
           ),
         );
       } else {

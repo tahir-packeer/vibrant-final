@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:connectivity_plus/connectivity_plus.dart'; // Import the connectivity package
-import '../global.dart'; // import the global variables
-import './Customer/customerDashboard.dart'; // import the CustomerDashboard page
+import 'package:connectivity_plus/connectivity_plus.dart';
+import '../global.dart';
+import './Customer/customerDashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -16,44 +17,51 @@ class _LoginScreenState extends State<LoginScreen> {
   String _password = '';
   bool _isLoading = false;
   bool _passwordVisible = false; // Visibility toggle for password
-  String _connectionStatus = 'Unknown'; // To display the connection status
+  String _connectionStatus = ''; // To display the connection status
   late Connectivity _connectivity;
-  late Stream<List<ConnectivityResult>> _connectivityStream;
+  late Stream<ConnectivityResult> _connectivityStream;
+  Timer? _statusTimer;
 
   @override
   void initState() {
     super.initState();
     _connectivity = Connectivity();
-    _connectivityStream = _connectivity.onConnectivityChanged;
+    _connectivityStream = _connectivity.onConnectivityChanged.map((event) => event.first);
 
-    _checkConnectivity();
-
-    _connectivityStream.listen((List<ConnectivityResult> resultList) {
-      if (resultList.isNotEmpty) {
-        _updateConnectionStatus(resultList.first);
-      } else {
-        _updateConnectionStatus(ConnectivityResult.none);
-      }
+    _connectivityStream.listen((ConnectivityResult result) {
+      _updateConnectionStatus(result);
     });
   }
 
   Future<void> _checkConnectivity() async {
-    final result = await _connectivity.checkConnectivity();
-    _updateConnectionStatus(result as ConnectivityResult);
+    final List<ConnectivityResult> results = await _connectivity.checkConnectivity();
+    final ConnectivityResult result = results.first;
+    _updateConnectionStatus(result);
   }
 
   void _updateConnectionStatus(ConnectivityResult result) {
     String status;
     if (result == ConnectivityResult.mobile) {
-      status = 'Mobile Data';
+      status = 'Connected to Mobile Data';
     } else if (result == ConnectivityResult.wifi) {
-      status = 'WiFi';
+      status = 'Connected to WiFi';
     } else {
       status = 'No Internet Connection';
     }
 
     setState(() {
       _connectionStatus = status;
+    });
+
+    _startStatusTimer();
+  }
+
+  void _startStatusTimer() {
+    _statusTimer?.cancel();
+    _statusTimer = Timer(Duration(seconds: 3), () {
+      setState(() {
+        _connectionStatus = '';
+      });
     });
   }
 
@@ -91,17 +99,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       showSnackbarMessage(context, "Login successful!", true);
 
-      if (userType == 'customer') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => CustomerDashboard()),
-        );
-      } else if (userType == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => CustomerDashboard()),
-        );
-      }
+      // Navigate to dashboard based on user type
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => CustomerDashboard()),
+      );
     } else {
       final errorMessage = json.decode(response.body)['message'] ?? 'Login failed';
       showSnackbarMessage(context, errorMessage, false);
@@ -126,9 +128,33 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Image.asset(
               'assets/gym.jpg', // Add your background image here
               fit: BoxFit.cover,
-              //image transparency
             ),
           ),
+          if (_connectionStatus.isNotEmpty)
+            Positioned(
+              top: 50,
+              left: 20,
+              right: 20,
+              child: Container(
+                padding: EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  _connectionStatus,
+                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
           Column(
             children: [
               Spacer(), // Push the content to the bottom
@@ -145,6 +171,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
+                        SizedBox(height: 16),
+
                         // Email Field
                         Text(
                           'Email Address',
@@ -166,6 +194,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               _email = value;
                             });
                           },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            return null;
+                          },
                         ),
                         SizedBox(height: 16),
 
@@ -185,9 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _passwordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
+                                _passwordVisible ? Icons.visibility : Icons.visibility_off,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -202,10 +234,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               _password = value;
                             });
                           },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            return null;
+                          },
                         ),
-                        SizedBox(height: 16),
-
-                        // Forgot Password Link
                         SizedBox(height: 16),
 
                         // Login Button
@@ -243,14 +278,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: RichText(
                               text: TextSpan(
                                 text: "Don't have an account? ",
-                                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                                style: TextStyle(color: Colors.black),
                                 children: [
                                   TextSpan(
                                     text: 'Register now',
                                     style: TextStyle(
-                                      color: Colors.grey.shade700,
-                                      decoration: TextDecoration.underline,
                                       fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
                                     ),
                                   ),
                                 ],

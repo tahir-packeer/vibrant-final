@@ -43,6 +43,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       home: Scaffold(
         appBar: _buildAppBar(context),
         body: _screens[_selectedIndex],
+        drawer: orientation == Orientation.landscape ? _buildDrawer() : null,
         bottomNavigationBar: orientation == Orientation.portrait
             ? _buildBottomNavigationBar()
             : null,
@@ -52,10 +53,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text("Vibrant"),
+      title: Text("Vibrant", style: TextStyle(fontWeight: FontWeight.bold)),
       actions: [
         IconButton(
-          icon: Icon(_isDarkMode ? Icons.brightness_3 : Icons.wb_sunny),
+          icon: Icon(_isDarkMode ? Icons.brightness_2_outlined : Icons.sunny),
           onPressed: () {
             setState(() {
               _isDarkMode = !_isDarkMode;
@@ -81,6 +82,68 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           },
         ),
       ],
+    );
+  }
+
+  Drawer _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: _isDarkMode ? CustomColors.primaryColorDark : CustomColors.primaryColorLight,
+            ),
+            child: Text(
+              'Navigation',
+              style: TextStyle(
+                color: _isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight,
+                fontSize: 24,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text('Home'),
+            onTap: () {
+              setState(() {
+                _selectedIndex = 0;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.shopping_bag_outlined),
+            title: Text('Cart'),
+            onTap: () {
+              setState(() {
+                _selectedIndex = 1;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.shopping_bag),
+            title: Text('Orders'),
+            onTap: () {
+              setState(() {
+                _selectedIndex = 2;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Text('Profile'),
+            onTap: () {
+              setState(() {
+                _selectedIndex = 3;
+              });
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -170,10 +233,10 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   }
 
   void _startPromotionTimer() {
-    _promotionTimer = Timer.periodic(Duration(seconds: 6), (timer) {
-      // Fade out
+    _promotionTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+      // Fade out to a higher opacity
       setState(() {
-        _opacity = 0.0;
+        _opacity = 0.7; // Change this value to adjust the opacity
       });
 
       // Delay for the fade out
@@ -182,20 +245,20 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
         if (_currentPromotionIndex < promotionalProducts.length - 1) {
           _currentPromotionIndex++;
         } else {
-          _currentPromotionIndex = 0; // Loop back to the first
+          _currentPromotionIndex = 0;
         }
 
-        // Animate to the next page with sliding effect to the right
+        // Animate to the next page with sliding effect
         _pageController.animateToPage(
           _currentPromotionIndex,
-          duration: Duration(milliseconds: 1000), // Slower transition
+          duration: Duration(milliseconds: 1100), // Slower transition
           curve: Curves.easeInOut,
         );
 
         // Fade in
-        Future.delayed(Duration(milliseconds: 40), () {
+        Future.delayed(Duration(milliseconds: 500), () {
           setState(() {
-            _opacity = 0.2;
+            _opacity = 1.0; // Fade back to fully visible
           });
         });
       });
@@ -271,9 +334,12 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   Widget _buildSearchBar() {
     return TextField(
       decoration: InputDecoration(
-        labelText: 'Search Products',
+        labelText: 'Search Products', labelStyle: TextStyle(color: Colors.grey.shade600),
         prefixIcon: Icon(Icons.search),
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide.none,
+        ),
         filled: true,
         fillColor: Colors.grey[200],
       ),

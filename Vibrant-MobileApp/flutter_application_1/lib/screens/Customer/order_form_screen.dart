@@ -32,6 +32,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   final cardNameController = TextEditingController();
   final cardExpiryController = TextEditingController();
   final cardCvvController = TextEditingController();
+  double finalAmount = 0.0;
 
   // Function to submit order details
   Future<void> _submitOrder() async {
