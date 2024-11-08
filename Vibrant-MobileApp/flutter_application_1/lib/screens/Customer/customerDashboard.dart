@@ -36,18 +36,13 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   Widget build(BuildContext context) {
     var orientation = MediaQuery.of(context).orientation;
 
-    return MaterialApp(
-      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      theme: _buildLightTheme(),
-      darkTheme: _buildDarkTheme(),
-      home: Scaffold(
-        appBar: _buildAppBar(context),
-        body: _screens[_selectedIndex],
-        drawer: orientation == Orientation.landscape ? _buildDrawer() : null,
-        bottomNavigationBar: orientation == Orientation.portrait
-            ? _buildBottomNavigationBar()
-            : null,
-      ),
+    return Scaffold(
+      appBar: _buildAppBar(context),
+      body: _screens[_selectedIndex],
+      drawer: orientation == Orientation.landscape ? _buildDrawer() : null,
+      bottomNavigationBar: orientation == Orientation.portrait
+          ? _buildBottomNavigationBar()
+          : null,
     );
   }
 
@@ -92,12 +87,16 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              color: _isDarkMode ? CustomColors.primaryColorDark : CustomColors.primaryColorLight,
+              color: _isDarkMode
+                  ? CustomColors.primaryColorDark
+                  : CustomColors.primaryColorLight,
             ),
             child: Text(
               'Navigation',
               style: TextStyle(
-                color: _isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight,
+                color: _isDarkMode
+                    ? CustomColors.textColorDark
+                    : CustomColors.textColorLight,
                 fontSize: 24,
               ),
             ),
@@ -196,7 +195,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   void _logout(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginScreen()),
-          (Route<dynamic> route) => false,
+      (Route<dynamic> route) => false,
     );
   }
 }
@@ -301,10 +300,10 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
       filteredProducts = query.isEmpty
           ? products
           : products.where((product) {
-        return product['name']
-            .toLowerCase()
-            .contains(query.toLowerCase());
-      }).toList();
+              return product['name']
+                  .toLowerCase()
+                  .contains(query.toLowerCase());
+            }).toList();
     });
   }
 
@@ -320,8 +319,20 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
           children: [
             _buildSearchBar(),
             SizedBox(height: 16.0),
-            if (promotionalProducts.isNotEmpty) _buildPromotionSlider(),
+            if (promotionalProducts.isNotEmpty) ...[
+              Text(
+                'Promotions',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8.0),
+              _buildPromotionSlider(),
+            ],
             SizedBox(height: 16.0),
+            Text(
+              'Products',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.0),
             isLoading
                 ? Center(child: CircularProgressIndicator())
                 : _buildProductGrid(orientation),
@@ -334,7 +345,8 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   Widget _buildSearchBar() {
     return TextField(
       decoration: InputDecoration(
-        labelText: 'Search Products', labelStyle: TextStyle(color: Colors.grey.shade600),
+        labelText: 'Search Products',
+        labelStyle: TextStyle(color: Colors.grey.shade600),
         prefixIcon: Icon(Icons.search),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50.0),
@@ -362,7 +374,8 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
           var product = promotionalProducts[index];
           return AnimatedOpacity(
             opacity: _opacity,
-            duration: Duration(milliseconds: 500), // Duration of the fade effect
+            duration:
+                Duration(milliseconds: 500), // Duration of the fade effect
             child: _buildPromotionCard(product),
           );
         },
@@ -430,14 +443,14 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "\$${product['item_price']?.toString() ?? '0.00'}",
+                        "\Rs ${product['item_price']?.toString() ?? '0.00'}",
                         style: TextStyle(
                           decoration: TextDecoration.lineThrough,
                           color: Colors.grey[300],
                         ),
                       ),
                       Text(
-                        "Promo: \$${product['promotion_price']?.toString() ?? '0.00'}",
+                        "Promo: \Rs ${product['promotion_price']?.toString() ?? '0.00'}",
                         style: TextStyle(
                           color: Colors.green,
                           fontWeight: FontWeight.bold,
@@ -459,29 +472,34 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
     return filteredProducts.isEmpty
         ? Center(child: Text('No products found.'))
         : GridView.builder(
-      physics: NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
-        crossAxisSpacing: 5.0,
-        mainAxisSpacing: 10.0,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: filteredProducts.length,
-      itemBuilder: (context, index) {
-        var product = filteredProducts[index];
-        return _buildProductCard(product);
-      },
-    );
+            physics: NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
+              crossAxisSpacing: 5.0,
+              mainAxisSpacing: 10.0,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: filteredProducts.length,
+            itemBuilder: (context, index) {
+              var product = filteredProducts[index];
+              return _buildProductCard(product);
+            },
+          );
   }
 
   Widget _buildProductCard(dynamic product) {
-    double? originalPrice = double.tryParse(product['item_price'].toString());
-    double? promoPrice = double.tryParse(product['promotion_price']?.toString() ?? '0');
-
-    double? discountPercent = originalPrice != null && promoPrice != null && promoPrice < originalPrice
-        ? ((originalPrice - promoPrice) / originalPrice * 100).roundToDouble()
+    double originalPrice = double.parse(product['item_price'].toString());
+    double? promoPrice = product['promotion_price'] != null
+        ? double.parse(product['promotion_price'].toString())
         : null;
+    bool hasValidPromo =
+        promoPrice != null && promoPrice > 0 && promoPrice < originalPrice;
+    double displayPrice = hasValidPromo ? promoPrice! : originalPrice;
+
+    double discountPercent = hasValidPromo
+        ? ((originalPrice - promoPrice!) / originalPrice * 100)
+        : 0;
 
     return GestureDetector(
       onTap: () {
@@ -546,27 +564,17 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (promoPrice != null && promoPrice < originalPrice!)
-                        Text(
-                          "\Rs ${promoPrice.toStringAsFixed(2)}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
-                          ),
-                        )
-                      else
-                        Text(
-                          "\Rs ${originalPrice?.toStringAsFixed(2)}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
-                          ),
+                      Text(
+                        "\Rs ${displayPrice.toStringAsFixed(2)}",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
                         ),
-                      if (promoPrice != null)
+                      ),
+                      if (hasValidPromo)
                         Text(
-                          "\Rs ${originalPrice?.toStringAsFixed(2)}",
+                          "\Rs ${originalPrice.toStringAsFixed(2)}",
                           style: TextStyle(
                             color: Colors.grey[300],
                             decoration: TextDecoration.lineThrough,
@@ -588,7 +596,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 ],
               ),
             ),
-            if (discountPercent != null)
+            if (discountPercent > 0)
               Positioned(
                 top: 8.0,
                 left: 8.0,

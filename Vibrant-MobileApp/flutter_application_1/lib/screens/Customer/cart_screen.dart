@@ -14,7 +14,8 @@ class CartScreen extends StatefulWidget {
   _CartScreenState createState() => _CartScreenState();
 }
 
-class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateMixin {
+class _CartScreenState extends State<CartScreen>
+    with SingleTickerProviderStateMixin {
   List<dynamic> cartItems = [];
   bool isLoading = true;
   double cartTotal = 0.0;
@@ -105,64 +106,74 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
           children: [
             Icon(
               Icons.shopping_bag_outlined,
-              color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+              color: isDarkTheme
+                  ? CustomColors.textColorDark
+                  : CustomColors.textColorLight,
             ),
             SizedBox(width: 8),
             Text(
               'Bag',
               style: TextStyle(
-                color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+                color: isDarkTheme
+                    ? CustomColors.textColorDark
+                    : CustomColors.textColorLight,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
         centerTitle: true,
-        backgroundColor: isDarkTheme ? CustomColors.primaryColorDark : CustomColors.primaryColorLight,
+        backgroundColor: isDarkTheme
+            ? CustomColors.primaryColorDark
+            : CustomColors.primaryColorLight,
         elevation: 0,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : cartItems.isEmpty
-          ? Center(
-        child: Text(
-          'Your Cart is empty',
-          style: TextStyle(
-            fontSize: 18,
-            color: !isDarkTheme ? CustomColors.textColorLight : CustomColors.cardColorDark,
-          ),
-        ),
-      )
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: cartItems.length,
-                itemBuilder: (context, index) {
-                  var cartItem = cartItems[index];
-                  return Dismissible(
-                    key: Key(cartItem['id'].toString()),
-                    direction: DismissDirection.endToStart,
-                    background: _buildDismissBackground(),
-                    onDismissed: (direction) {
-                      deleteCartItem(cartItem['id']);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("${cartItem['product_name']} removed from cart")),
-                      );
-                    },
-                    movementDuration: Duration(milliseconds: 500),
-                    resizeDuration: Duration(milliseconds: 300),
-                    child: _buildCartItemCard(cartItem, isDarkTheme),
-                  );
-                },
-              ),
-            ),
-            _buildCartTotal(isDarkTheme),
-          ],
-        ),
-      ),
+              ? Center(
+                  child: Text(
+                    'Your Cart is empty',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: !isDarkTheme
+                          ? CustomColors.textColorLight
+                          : CustomColors.cardColorDark,
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: cartItems.length,
+                          itemBuilder: (context, index) {
+                            var cartItem = cartItems[index];
+                            return Dismissible(
+                              key: Key(cartItem['id'].toString()),
+                              direction: DismissDirection.endToStart,
+                              background: _buildDismissBackground(),
+                              onDismissed: (direction) {
+                                deleteCartItem(cartItem['id']);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          "${cartItem['product_name']} removed from cart")),
+                                );
+                              },
+                              movementDuration: Duration(milliseconds: 500),
+                              resizeDuration: Duration(milliseconds: 300),
+                              child: _buildCartItemCard(cartItem, isDarkTheme),
+                            );
+                          },
+                        ),
+                      ),
+                      _buildCartTotal(isDarkTheme),
+                    ],
+                  ),
+                ),
     );
   }
 
@@ -195,7 +206,9 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
       child: Card(
         elevation: 2,
         margin: EdgeInsets.symmetric(vertical: 8),
-        color: isDarkTheme ? CustomColors.cardColorDark : CustomColors.cardColorLight,
+        color: isDarkTheme
+            ? CustomColors.cardColorDark
+            : CustomColors.cardColorLight,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5), // Rounded edges
         ),
@@ -231,7 +244,8 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                       children: [
                         if (hasDiscount) ...[
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.red,
                               borderRadius: BorderRadius.circular(4),
@@ -252,7 +266,9 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+                            color: isDarkTheme
+                                ? CustomColors.textColorDark
+                                : CustomColors.textColorLight,
                           ),
                         ),
                         SizedBox(height: 4),
@@ -260,7 +276,9 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                           "Size: ${cartItem['size']}",
                           style: TextStyle(
                             fontSize: 14,
-                            color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+                            color: isDarkTheme
+                                ? CustomColors.textColorDark
+                                : CustomColors.textColorLight,
                           ),
                         ),
                         SizedBox(height: 4),
@@ -281,7 +299,9 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+                                color: isDarkTheme
+                                    ? CustomColors.textColorDark
+                                    : CustomColors.textColorLight,
                               ),
                             ),
                           ],
@@ -293,25 +313,39 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                               "Qty: ",
                               style: TextStyle(
                                 fontSize: 14,
-                                color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+                                color: isDarkTheme
+                                    ? CustomColors.textColorDark
+                                    : CustomColors.textColorLight,
                               ),
                             ),
                             IconButton(
-                              icon: Icon(Icons.remove, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+                              icon: Icon(Icons.remove,
+                                  color: isDarkTheme
+                                      ? CustomColors.textColorDark
+                                      : CustomColors.textColorLight),
                               onPressed: () {
                                 if (cartItem['product_qty'] > 1) {
-                                  updateCartQuantity(cartItem['id'], cartItem['product_qty'] - 1);
+                                  updateCartQuantity(cartItem['id'],
+                                      cartItem['product_qty'] - 1);
                                 }
                               },
                             ),
                             Text(
                               '${cartItem['product_qty']}',
-                              style: TextStyle(fontSize: 14, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: isDarkTheme
+                                      ? CustomColors.textColorDark
+                                      : CustomColors.textColorLight),
                             ),
                             IconButton(
-                              icon: Icon(Icons.add, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+                              icon: Icon(Icons.add,
+                                  color: isDarkTheme
+                                      ? CustomColors.textColorDark
+                                      : CustomColors.textColorLight),
                               onPressed: () {
-                                updateCartQuantity(cartItem['id'], cartItem['product_qty'] + 1);
+                                updateCartQuantity(cartItem['id'],
+                                    cartItem['product_qty'] + 1);
                               },
                             ),
                           ],
@@ -327,7 +361,9 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+                  color: isDarkTheme
+                      ? CustomColors.textColorDark
+                      : CustomColors.textColorLight,
                 ),
               ),
             ],
@@ -345,7 +381,12 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
         children: [
           Text(
             "Total: \Rs ${cartTotal.toStringAsFixed(2)}",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDarkTheme
+                    ? CustomColors.textColorDark
+                    : CustomColors.textColorLight),
           ),
           SizedBox(height: 10),
           ElevatedButton(
@@ -376,7 +417,9 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                   cartTotal = 0.0;
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Order placed successfully. Cart cleared!')),
+                  SnackBar(
+                      content:
+                          Text('Order placed successfully. Cart cleared!')),
                 );
               }
             },
@@ -385,16 +428,24 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorDark,
+                color: isDarkTheme
+                    ? CustomColors.textColorDark
+                    : CustomColors.textColorDark,
               ),
             ),
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-              backgroundColor: isDarkTheme ? CustomColors.cardColorDark : CustomColors.primaryColorDark,
+              backgroundColor: isDarkTheme
+                  ? CustomColors.cardColorDark
+                  : CustomColors.primaryColorDark,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              textStyle: TextStyle(fontSize: 16, color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight),
+              textStyle: TextStyle(
+                  fontSize: 16,
+                  color: isDarkTheme
+                      ? CustomColors.textColorDark
+                      : CustomColors.textColorLight),
             ),
           ),
         ],

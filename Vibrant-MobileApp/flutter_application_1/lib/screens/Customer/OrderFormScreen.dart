@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../global.dart';
 import 'customerDashboard.dart';
-import 'orders_list_screen.dart'; // import your global constants like API_BASE_URL
 
 class OrderFormScreen extends StatefulWidget {
   final List<Map<String, dynamic>> orderDetails;
   final double cartTotal;
 
-  OrderFormScreen({required this.orderDetails, required this.cartTotal});
+  const OrderFormScreen({super.key, required this.orderDetails, required this.cartTotal});
 
   @override
   _OrderFormScreenState createState() => _OrderFormScreenState();
@@ -30,7 +29,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       isLoading = true;
     });
 
-    final String apiUrl = "${API_BASE_URL}/orders/bulk/cart";
+    const String apiUrl = "$API_BASE_URL/orders/bulk/cart";
 
     // Prepare the order payload
     Map<String, dynamic> orderPayload = {
@@ -67,12 +66,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Error'),
-          content: Text('Failed to place the order. Please try again.'),
+          title: const Text('Error'),
+          content: const Text('Failed to place the order. Please try again.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),
@@ -89,10 +88,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order Form'),
+        title: const Text('Order Form'),
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -106,10 +105,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   children: [
                     Text(
                       'Product: ${item['product_name']}',
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text('Product ID: ${item['product_id']}'),
                     Text('Quantity: ${item['product_qty']}'),
                   ],
@@ -117,20 +116,20 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               ),
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: 'Your Name'),
+              decoration: const InputDecoration(labelText: 'Your Name'),
             ),
             TextField(
               controller: _addressController,
-              decoration: InputDecoration(labelText: 'Your Address'),
+              decoration: const InputDecoration(labelText: 'Your Address'),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Payment Details',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             TextField(
               controller: _cardNumberController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Card Number',
                 prefixIcon: Icon(Icons.credit_card),
               ),
@@ -138,7 +137,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             ),
             TextField(
               controller: _cardHolderController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Card Holder Name',
                 prefixIcon: Icon(Icons.person),
               ),
@@ -148,18 +147,18 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 Expanded(
                   child: TextField(
                     controller: _expiryDateController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Expiry Date',
                       prefixIcon: Icon(Icons.calendar_today),
                     ),
                     keyboardType: TextInputType.datetime,
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
                     controller: _cvvController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'CVV',
                       prefixIcon: Icon(Icons.lock),
                     ),
@@ -168,21 +167,21 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               "Total: \$${widget.cartTotal.toStringAsFixed(2)}",
               style:
-              TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: placeOrder,
-              child: Text("Place Order"),
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                     horizontal: 50, vertical: 15),
-                textStyle: TextStyle(fontSize: 16),
+                textStyle: const TextStyle(fontSize: 16),
               ),
+              child: Text("Place Order"),
             ),
           ],
         ),

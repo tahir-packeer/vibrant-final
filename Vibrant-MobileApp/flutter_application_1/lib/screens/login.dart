@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -26,7 +27,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _connectivity = Connectivity();
-    _connectivityStream = _connectivity.onConnectivityChanged.map((event) => event.first);
+    _connectivityStream =
+        _connectivity.onConnectivityChanged.map((event) => event.first);
 
     _connectivityStream.listen((ConnectivityResult result) {
       _updateConnectionStatus(result);
@@ -34,7 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _checkConnectivity() async {
-    final List<ConnectivityResult> results = await _connectivity.checkConnectivity();
+    final List<ConnectivityResult> results =
+        await _connectivity.checkConnectivity();
     final ConnectivityResult result = results.first;
     _updateConnectionStatus(result);
   }
@@ -66,47 +69,58 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> loginUser() async {
-    if (_connectionStatus == 'No Internet Connection') {
-      showSnackbarMessage(context, 'Please check your internet connection.', false);
-      return;
-    }
+    try {
+      final url = Uri.parse('$API_BASE_URL/login');
+      print('Attempting to connect to: $url'); // Debug URL
 
-    setState(() {
-      _isLoading = true; // Show loading spinner
-    });
-
-    final url = Uri.parse('${API_BASE_URL}/login');
-
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        'email': _email,
-        'password': _password,
-      }),
-    );
-
-    setState(() {
-      _isLoading = false; // Hide loading spinner
-    });
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final String userType = data['user']['user_type'];
-      final int userId = data['user']['id'];
-
-      globalUserId = userId;
-
-      showSnackbarMessage(context, "Login successful!", true);
-
-      // Navigate to dashboard based on user type
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => CustomerDashboard()),
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",  // Add this header
+        },
+        body: json.encode({
+          'email': _email,
+          'password': _password,
+        }),
+      ).timeout(
+        const Duration(seconds: 30),  // Increase timeout
+        onTimeout: () {
+          throw TimeoutException('Connection timed out. Please check your internet connection.');
+        },
       );
-    } else {
-      final errorMessage = json.decode(response.body)['message'] ?? 'Login failed';
-      showSnackbarMessage(context, errorMessage, false);
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final String userType = data['user']['user_type'];
+        final int userId = data['user']['id'];
+
+        globalUserId = userId;
+
+        showSnackbarMessage(context, "Login successful!", true);
+
+        // Navigate to dashboard based on user type
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => CustomerDashboard()),
+        );
+      } else {
+        final errorMessage =
+            json.decode(response.body)['message'] ?? 'Login failed';
+        showSnackbarMessage(context, errorMessage, false);
+      }
+    } on SocketException catch (e) {
+      print('Socket Error: $e');
+      showSnackbarMessage(context, 'Connection error. Please check your internet and server.', false);
+    } on TimeoutException catch (e) {
+      print('Timeout Error: $e');
+      showSnackbarMessage(context, 'Connection timed out. Please try again.', false);
+    } catch (e) {
+      print('General Error: $e');
+      showSnackbarMessage(context, 'An error occurred: $e', false);
     }
   }
 
@@ -176,7 +190,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         // Email Field
                         Text(
                           'Email Address',
-                          style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold),
                         ),
                         TextFormField(
                           decoration: InputDecoration(
@@ -186,7 +203,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey), // Set border color to grey
+                              borderSide: BorderSide(
+                                  color:
+                                      Colors.grey), // Set border color to grey
                             ),
                           ),
                           onChanged: (value) {
@@ -206,7 +225,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         // Password Field
                         Text(
                           'Password',
-                          style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold),
                         ),
                         TextFormField(
                           decoration: InputDecoration(
@@ -219,7 +241,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                                _passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -228,7 +252,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
                           ),
-                          obscureText: !_passwordVisible, // Toggle password visibility
+                          obscureText:
+                              !_passwordVisible, // Toggle password visibility
                           onChanged: (value) {
                             setState(() {
                               _password = value;
@@ -247,25 +272,26 @@ class _LoginScreenState extends State<LoginScreen> {
                         _isLoading
                             ? Center(child: CircularProgressIndicator())
                             : SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black, // Black for button
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.black, // Black for button
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    if (_formKey.currentState!.validate()) {
+                                      loginUser();
+                                    }
+                                  },
+                                  child: Text('LOG IN',
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.white)),
+                                ),
                               ),
-                            ),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                loginUser();
-                              }
-                            },
-                            child: Text('LOG IN',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white)),
-                          ),
-                        ),
                         SizedBox(height: 16),
 
                         // Register Now Text
@@ -273,7 +299,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           child: TextButton(
                             onPressed: () {
-                              Navigator.pushReplacementNamed(context, '/register');
+                              Navigator.pushReplacementNamed(
+                                  context, '/register');
                             },
                             child: RichText(
                               text: TextSpan(
