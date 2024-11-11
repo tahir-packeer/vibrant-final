@@ -131,7 +131,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.grey[100],
+      backgroundColor: isDarkMode
+          ? Theme.of(context).scaffoldBackgroundColor
+          : Colors.grey[100],
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : product == null
@@ -141,7 +143,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     SliverAppBar(
                       expandedHeight: 300,
                       pinned: true,
-                      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                      backgroundColor: isDarkMode
+                          ? Theme.of(context).appBarTheme.backgroundColor
+                          : Colors.white,
                       iconTheme: IconThemeData(
                         color: isDarkMode ? Colors.white : Colors.black,
                       ),
@@ -186,10 +190,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.black : Colors.white,
+                          color: isDarkMode ? Colors.grey[900] : Colors.white,
                           borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(30),
-                            topRight: Radius.circular(30),
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5),
                           ),
                         ),
                         child: Column(
@@ -203,7 +207,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                   child: Text(
                                     product!['name'],
                                     style: TextStyle(
-                                      fontSize: 24,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white
@@ -216,16 +220,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                   children: [
                                     if (product!['promotion_price'] != null)
                                       Text(
-                                        "\$${product!['promotion_price']}",
+                                        "\Rs ${product!['promotion_price']}",
                                         style: TextStyle(
-                                          fontSize: 24,
+                                          fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.green.shade400,
                                         ),
                                       ),
                                     if (product!['promotion_price'] != null)
                                       Text(
-                                        "\$${product!['item_price']}",
+                                        "\Rs ${product!['item_price']}",
                                         style: TextStyle(
                                           fontSize: 16,
                                           decoration:
@@ -237,9 +241,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       )
                                     else
                                       Text(
-                                        "\$${product!['item_price']}",
+                                        "\Rs ${product!['item_price']}",
                                         style: TextStyle(
-                                          fontSize: 24,
+                                          fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.green.shade400,
                                         ),
@@ -254,7 +258,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                   horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: isDarkMode
-                                    ? Colors.grey[900]
+                                    ? Colors.grey[850]
                                     : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(20),
                               ),
@@ -301,7 +305,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                               padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
                                 color: isDarkMode
-                                    ? Colors.grey[900]
+                                    ? Colors.grey[800]
                                     : Colors.grey[100],
                                 borderRadius: BorderRadius.circular(15),
                               ),
@@ -321,16 +325,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                     isDarkMode,
                                   ),
                                   const SizedBox(height: 10),
-                                  _buildCategoryDetail(
-                                    "Fabric Type",
-                                    product!['category']?['fabric_type'] ??
-                                        'N/A',
-                                    isDarkMode,
-                                  ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 30),
+                            const SizedBox(height: 50),
                             Row(
                               children: [
                                 SizedBox(
@@ -357,7 +355,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 15),
                                       backgroundColor: product!['quantity'] > 0
-                                          ? Colors.blue
+                                          ? (isDarkMode
+                                              ? Colors.white
+                                              : Colors.black)
                                           : Colors.grey,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
@@ -374,24 +374,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       },
                                       child: _isAddingToCart
                                           ? _showSuccess
-                                              ? const Icon(Icons.check,
-                                                  color: Colors.white,
+                                              ? const Icon(
+                                                  Icons.check_circle,
+                                                  color: Colors.green,
                                                   size: 24,
-                                                  key: ValueKey('check'))
-                                              : const SizedBox(
+                                                  key: ValueKey('check'),
+                                                )
+                                              : SizedBox(
                                                   width: 24,
                                                   height: 24,
                                                   child:
                                                       CircularProgressIndicator(
-                                                    color: Colors.white,
+                                                    color: isDarkMode
+                                                        ? Colors.black
+                                                        : Colors.white,
                                                     strokeWidth: 2,
                                                   ),
                                                   key: ValueKey('loading'),
                                                 )
-                                          : const Icon(Icons.shopping_cart,
-                                              color: Colors.white,
+                                          : Icon(
+                                              Icons.shopping_cart,
+                                              color: isDarkMode
+                                                  ? Colors.black
+                                                  : Colors.white,
                                               size: 24,
-                                              key: ValueKey('cart')),
+                                              key: ValueKey('cart'),
+                                            ),
                                     ),
                                   ),
                                 ),
@@ -418,7 +426,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 15),
                                       backgroundColor: product!['quantity'] > 0
-                                          ? Colors.black
+                                          ? (isDarkMode
+                                              ? Colors.white
+                                              : Colors.black)
                                           : Colors.red,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
@@ -432,7 +442,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       style: TextStyle(
                                         fontSize: 18,
                                         color: product!['quantity'] > 0
-                                            ? Colors.white
+                                            ? (isDarkMode
+                                                ? Colors.black
+                                                : Colors.white)
                                             : Colors.white,
                                         fontWeight: FontWeight.bold,
                                       ),

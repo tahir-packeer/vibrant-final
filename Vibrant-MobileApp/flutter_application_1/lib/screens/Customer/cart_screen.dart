@@ -128,7 +128,7 @@ class _CartScreenState extends State<CartScreen>
             ),
             const SizedBox(width: 8),
             Text(
-              'Cart',
+              'Bag',
               style: TextStyle(
                 color: theme.brightness == Brightness.light
                     ? Colors.black
@@ -143,7 +143,7 @@ class _CartScreenState extends State<CartScreen>
           : cartItems.isEmpty
               ? Center(
                   child: Text(
-                    'Your Cart is empty',
+                    'Your Bag is empty',
                     style: TextStyle(
                       fontSize: 18,
                       color: theme.textTheme.bodyMedium?.color ?? Colors.black,
@@ -203,7 +203,7 @@ class _CartScreenState extends State<CartScreen>
                                 Text(
                                   "Total Amount:",
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                     color: theme.textTheme.bodyMedium?.color ??
                                         Colors.black,
@@ -212,7 +212,7 @@ class _CartScreenState extends State<CartScreen>
                                 Text(
                                   "Rs ${cartTotal.toStringAsFixed(2)}",
                                   style: TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     color: theme.textTheme.bodyMedium?.color ??
                                         Colors.black,
@@ -259,20 +259,23 @@ class _CartScreenState extends State<CartScreen>
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 15),
-                                  backgroundColor: theme.cardTheme.color,
+                                  backgroundColor:
+                                      theme.brightness == Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
+                                  elevation: 0,
                                 ),
                                 child: Text(
                                   "CHECKOUT",
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    color: theme.brightness == Brightness.dark
+                                        ? Colors.black
+                                        : Colors.white,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: theme.textTheme.bodyMedium?.color ??
-                                        Colors.black,
                                   ),
                                 ),
                               ),

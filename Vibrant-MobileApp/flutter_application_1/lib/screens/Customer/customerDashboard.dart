@@ -24,11 +24,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   bool _isDarkMode = false;
 
   List<Widget> get _screens => <Widget>[
-    const CustomerDashboardContent(),
-    const CartScreen(),
-    const OrdersListScreen(),
-    const ProfileScreen(),
-  ];
+        const CustomerDashboardContent(),
+        const CartScreen(),
+        const OrdersListScreen(),
+        const ProfileScreen(),
+      ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -66,26 +66,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 ? Colors.black
                 : Colors.white,
           )),
-      actions: [
-        IconButton(
-          icon: ColorFiltered(
-            colorFilter: ColorFilter.mode(
-              theme.brightness == Brightness.light
-                  ? CustomColors.primaryColorDark
-                  : CustomColors.primaryColorLight,
-              BlendMode.srcIn,
-            ),
-            child: Image.asset(
-              'assets/logout.png',
-              width: 25,
-              height: 25,
-            ),
-          ),
-          onPressed: () {
-            _logout(context);
-          },
-        ),
-      ],
     );
   }
 
@@ -122,7 +102,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           ),
           ListTile(
             leading: const Icon(Icons.shopping_bag_outlined),
-            title: const Text('Cart'),
+            title: const Text('Bag'),
             onTap: () {
               setState(() {
                 _selectedIndex = 1;
@@ -182,7 +162,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         ),
         const BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag_outlined),
-          label: 'Cart',
+          label: 'Bag',
         ),
         const BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag),
@@ -514,6 +494,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
     bool hasValidPromo =
         promoPrice != null && promoPrice > 0 && promoPrice < originalPrice;
     double displayPrice = hasValidPromo ? promoPrice : originalPrice;
+    bool isOutOfStock = product['quantity'] <= 0;
 
     double discountPercent = hasValidPromo
         ? ((originalPrice - promoPrice) / originalPrice * 100)
@@ -561,6 +542,52 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 ),
               ),
             ),
+            if (isOutOfStock)
+              Positioned(
+                top: 8.0,
+                right: 8.0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 4.0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: const Text(
+                    "SOLD OUT",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ),
+              ),
+            if (discountPercent > 0)
+              Positioned(
+                top: 8.0,
+                left: 8.0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 4.0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: Text(
+                    "${discountPercent.toStringAsFixed(0)}% OFF",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ),
+              ),
             Positioned(
               bottom: 16.0,
               left: 8.0,
@@ -584,10 +611,12 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                     children: [
                       Text(
                         "Rs ${displayPrice.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: isOutOfStock ? Colors.grey : Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16.0,
+                          decoration:
+                              isOutOfStock ? TextDecoration.lineThrough : null,
                         ),
                       ),
                       if (hasValidPromo)
@@ -614,27 +643,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 ],
               ),
             ),
-            if (discountPercent > 0)
-              Positioned(
-                top: 8.0,
-                left: 8.0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                  child: Text(
-                    "${discountPercent.toStringAsFixed(0)}% OFF",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12.0,
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),

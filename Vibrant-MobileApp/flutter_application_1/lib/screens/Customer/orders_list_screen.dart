@@ -227,10 +227,13 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.cardTheme.color,
+                    backgroundColor: theme.brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
+                    elevation: 0,
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -245,7 +248,9 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   child: Text(
                     "View Details",
                     style: TextStyle(
-                      color: theme.textTheme.bodyLarge?.color ?? Colors.black,
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.black
+                          : Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
