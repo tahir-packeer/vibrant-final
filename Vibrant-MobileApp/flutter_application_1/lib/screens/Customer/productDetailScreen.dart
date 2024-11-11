@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'order_form_screen.dart';
+import 'OrderFormScreen.dart';
 import '../../global.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -413,10 +413,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     OrderFormScreen(
-                                                  productId: widget.productId,
-                                                  productName: product!['name'],
-                                                  availableQuantity:
-                                                      product!['quantity'],
+                                                  orderDetails: [{
+                                                    'product_id': widget.productId,
+                                                    'product_name': product!['name'],
+                                                    'product_image': product!['image'],
+                                                    'product_qty': 1,
+                                                    'item_price': product!['promotion_price'] ?? product!['item_price'],
+                                                    'total_price': product!['promotion_price'] ?? product!['item_price'],
+                                                  }],
+                                                  cartTotal: double.parse(product!['promotion_price']?.toString() ?? product!['item_price'].toString()),
                                                 ),
                                               ),
                                             );

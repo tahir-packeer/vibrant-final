@@ -615,8 +615,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                           color: isOutOfStock ? Colors.grey : Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16.0,
-                          decoration:
-                              isOutOfStock ? TextDecoration.lineThrough : null,
+                          decoration: isOutOfStock ? TextDecoration.lineThrough : null,
                         ),
                       ),
                       if (hasValidPromo)
