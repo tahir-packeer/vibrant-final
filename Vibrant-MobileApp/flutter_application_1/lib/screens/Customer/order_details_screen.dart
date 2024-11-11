@@ -50,22 +50,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode
-          ? CustomColors.backgroundColorLight
-          : CustomColors.primaryColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         iconTheme: IconThemeData(
-            color: isDarkMode
-                ? CustomColors.textColorDark
-                : CustomColors.textColorLight),
-        title: Text("Order Details",
-            style: TextStyle(
-                color: isDarkMode
-                    ? CustomColors.textColorDark
-                    : CustomColors.textColorLight)),
-        backgroundColor: isDarkMode
-            ? CustomColors.primaryColorDark
-            : CustomColors.primaryColor,
+          color: isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight
+        ),
+        title: Text("Order Details", style: TextStyle(color: isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight)),
+        backgroundColor: isDarkMode ? CustomColors.primaryColorDark : CustomColors.primaryColor,
         elevation: 0,
       ),
       body: isLoading
@@ -101,8 +92,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Widget _buildOrderCard(bool isDarkMode) {
     return Card(
-      color:
-          isDarkMode ? CustomColors.cardColorDark : CustomColors.cardColorLight,
+      color: isDarkMode
+          ? Theme.of(context).appBarTheme.backgroundColor
+          : Colors.white,
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -178,8 +170,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Widget _buildDelivererCard(bool isDarkMode) {
     return Card(
-      color:
-          isDarkMode ? CustomColors.cardColorDark : CustomColors.cardColorLight,
+      color: isDarkMode
+          ? Theme.of(context).appBarTheme.backgroundColor
+          : Colors.white,
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -242,8 +235,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Widget _buildProductCard(bool isDarkMode) {
     return Card(
-      color:
-          isDarkMode ? CustomColors.cardColorDark : CustomColors.cardColorLight,
+      color: isDarkMode
+          ? Theme.of(context).appBarTheme.backgroundColor
+          : Colors.white,
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

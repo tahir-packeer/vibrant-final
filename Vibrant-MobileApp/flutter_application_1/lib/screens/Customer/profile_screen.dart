@@ -11,11 +11,13 @@ import 'package:image_picker/image_picker.dart'; // Image picker package
 import 'package:provider/provider.dart';
 import '../../custom_colors.dart';
 import '../../global.dart';
-import '../../theme_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../login.dart'; // Import the login screen
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback? onProfileUpdate;
+
+  const ProfileScreen({super.key, this.onProfileUpdate});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -38,6 +40,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Image picker instance
   final ImagePicker _picker = ImagePicker();
+
+  bool isPersonalInfoExpanded = false;
+  bool isAccountInfoExpanded = false;
+  bool isSettingsExpanded = false;
 
   @override
   void initState() {
@@ -92,19 +98,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         body: json.encode({
           "name": nameController.text,
           "email": emailController.text,
-          "profile_image":
-              base64Image, // Include Base64 image string in the request
+          "profile_image": base64Image,
         }),
       );
 
       if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(json.decode(response.body)['message'])),
+          SnackBar(content: Text(responseData['message'])),
         );
         setState(() {
           isEditing = false;
-          userProfile = json.decode(response.body)['user'];
+          userProfile = responseData['user'];
+          print(
+              "Updated profile image: ${userProfile!['profile_image']}"); // Debug print
         });
+
+        // Call the callback to refresh the profile image in dashboard
+        widget.onProfileUpdate?.call();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to update profile')),
@@ -199,29 +210,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: isDarkMode
+            ? Theme.of(context).appBarTheme.backgroundColor
+            : Colors.white,
+        iconTheme: IconThemeData(
+          color: isDarkMode ? Colors.white : Colors.black,
+        ),
         title: Text(
           'Profile',
           style: TextStyle(
-            color: theme.appBarTheme.foregroundColor,
+            color: isDarkMode ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         actions: [
           IconButton(
             icon: Icon(isEditing ? Icons.check : Icons.edit),
-            color: theme.appBarTheme.foregroundColor,
+            color: isDarkMode ? Colors.white : Colors.black,
             onPressed: () {
               if (isEditing) {
-                updateUserProfile(); // Call the update function
+                updateUserProfile();
               } else {
                 setState(() {
-                  isEditing = true; // Enable editing mode
+                  isEditing = true;
                 });
               }
             },
@@ -230,133 +248,264 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
+          : SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        _showImageSourceDialog(context);
-                      },
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _profileImage != null
-                            ? (_profileImage!.existsSync()
-                                ? FileImage(_profileImage!)
-                                : NetworkImage(
-                                    "http://10.0.2.2:8000${userProfile!['profile_image']}"))
-                            : const AssetImage('assets/default_profile.png')
-                                as ImageProvider,
-                        child: Align(
-                          alignment: Alignment.bottomRight,
-                          child: Icon(
-                            Icons.camera_alt_outlined,
-                            size: 28,
-                            color: Colors.grey[600],
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: isDarkMode
+                          ? Theme.of(context).appBarTheme.backgroundColor
+                          : Colors.white,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          spreadRadius: 1,
+                          blurRadius: 10,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: isEditing
+                              ? () => _showImageSourceDialog(context)
+                              : null,
+                          child: Stack(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Theme.of(context).primaryColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 55,
+                                  backgroundColor: Colors.grey[200],
+                                  backgroundImage: userProfile != null &&
+                                          userProfile!['profile_image'] != null &&
+                                          userProfile!['profile_image'].toString().isNotEmpty
+                                      ? NetworkImage("http://10.0.2.2:8000${userProfile!['profile_image']}")
+                                      : const AssetImage('assets/default_profile.png') as ImageProvider,
+                                ),
+                              ),
+                              if (isEditing)
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "Name",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  TextFormField(
-                    controller: nameController,
-                    enabled: isEditing,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your name',
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "Email",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  TextFormField(
-                    controller: emailController,
-                    enabled: isEditing,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your email',
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "User Type: ${userProfile!['user_type']}",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Joined: ${userProfile!['created_at']}",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.battery_full),
-                      const SizedBox(width: 10),
-                      Text("Battery Level: $_batteryLevel%"),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  if (isEditing)
-                    ElevatedButton(
-                      onPressed: isSubmitting
-                          ? null
-                          : () {
-                              updateUserProfile();
-                            },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        const SizedBox(height: 15),
+                        Text(
+                          nameController.text,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white : Colors.black87,
+                          ),
                         ),
-                      ),
-                      child: isSubmitting
-                          ? CircularProgressIndicator()
-                          : Text("Save Changes"),
-                    ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _logout(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme
-                            .cardTheme.color, // Change color based on theme
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        const SizedBox(height: 5),
+                        Text(
+                          emailController.text,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: isDarkMode ? Colors.white70 : Colors.black54,
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        "LOG OUT",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: theme.textTheme.bodyLarge?.color,
-                        ),
-                      ),
+                      ],
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              isPersonalInfoExpanded = !isPersonalInfoExpanded;
+                            });
+                          },
+                          child: _buildInfoCard(
+                            "Personal Information",
+                            [
+                              if (isPersonalInfoExpanded) ...[
+                                _buildTextField(
+                                  "Name",
+                                  nameController,
+                                  isEditing,
+                                  Icons.person,
+                                  isDarkMode,
+                                ),
+                                const SizedBox(height: 15),
+                                _buildTextField(
+                                  "Email",
+                                  emailController,
+                                  isEditing,
+                                  Icons.email,
+                                  isDarkMode,
+                                ),
+                              ],
+                            ],
+                            isDarkMode,
+                            isExpanded: isPersonalInfoExpanded,
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              isAccountInfoExpanded = !isAccountInfoExpanded;
+                            });
+                          },
+                          child: _buildInfoCard(
+                            "Account Information",
+                            [
+                              if (isAccountInfoExpanded) ...[
+                                _buildInfoRow(
+                                  "User Type",
+                                  userProfile!['user_type'],
+                                  Icons.badge,
+                                  isDarkMode,
+                                ),
+                                const SizedBox(height: 10),
+                                _buildInfoRow(
+                                  "Joined",
+                                  userProfile!['created_at'],
+                                  Icons.calendar_today,
+                                  isDarkMode,
+                                ),
+                                const SizedBox(height: 10),
+                                _buildInfoRow(
+                                  "Battery Level",
+                                  "$_batteryLevel%",
+                                  Icons.battery_full,
+                                  isDarkMode,
+                                ),
+                              ],
+                            ],
+                            isDarkMode,
+                            isExpanded: isAccountInfoExpanded,
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              isSettingsExpanded = !isSettingsExpanded;
+                            });
+                          },
+                          child: _buildInfoCard(
+                            "Settings",
+                            [
+                              if (isSettingsExpanded)
+                                _buildSettingsRow(
+                                  "Dark Mode",
+                                  Icons.dark_mode,
+                                  isDarkMode,
+                                  Switch(
+                                    value: Provider.of<ThemeProvider>(context)
+                                        .isDarkMode,
+                                    onChanged: (value) {
+                                      Provider.of<ThemeProvider>(context,
+                                              listen: false)
+                                          .toggleTheme();
+                                    },
+                                    activeColor: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                            ],
+                            isDarkMode,
+                            isExpanded: isSettingsExpanded,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        if (isEditing)
+                          ElevatedButton(
+                            onPressed: isSubmitting ? null : updateUserProfile,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 15,
+                                horizontal: 30,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: isSubmitting
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    "Save Changes",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        const SizedBox(height: 15),
+                        ElevatedButton(
+                          onPressed: () => _logout(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade400,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 15,
+                              horizontal: 30,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.logout, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                "LOG OUT",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -404,6 +553,164 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, List<Widget> children, bool isDarkMode,
+      {bool isExpanded = false}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDarkMode
+            ? Theme.of(context).appBarTheme.backgroundColor
+            : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black87,
+                ),
+              ),
+              Icon(
+                isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                color: isDarkMode ? Colors.white70 : Colors.grey[600],
+              ),
+            ],
+          ),
+          if (children.isNotEmpty) ...[
+            const SizedBox(height: 15),
+            ...children,
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    bool enabled,
+    IconData icon,
+    bool isDarkMode,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: isDarkMode ? Colors.white70 : Colors.black54,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: TextFormField(
+            controller: controller,
+            enabled: enabled,
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black87,
+            ),
+            decoration: InputDecoration(
+              prefixIcon: Icon(
+                icon,
+                color: isDarkMode ? Colors.white70 : Colors.grey[600],
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 15,
+                vertical: 15,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    IconData icon,
+    bool isDarkMode,
+  ) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: isDarkMode ? Colors.white70 : Colors.grey[600],
+        ),
+        const SizedBox(width: 10),
+        Text(
+          "$label: ",
+          style: TextStyle(
+            color: isDarkMode ? Colors.white70 : Colors.black54,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: isDarkMode ? Colors.white : Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSettingsRow(
+    String label,
+    IconData icon,
+    bool isDarkMode,
+    Widget trailing,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isDarkMode ? Colors.white70 : Colors.grey[600],
+            ),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                color: isDarkMode ? Colors.white70 : Colors.black54,
+              ),
+            ),
+          ],
+        ),
+        trailing,
+      ],
     );
   }
 }

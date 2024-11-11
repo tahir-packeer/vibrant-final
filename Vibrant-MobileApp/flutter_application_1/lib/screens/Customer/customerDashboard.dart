@@ -23,7 +23,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   int _selectedIndex = 0;
   bool _isDarkMode = false;
 
-  static final List<Widget> _screens = <Widget>[
+  List<Widget> get _screens => <Widget>[
     const CustomerDashboardContent(),
     const CartScreen(),
     const OrdersListScreen(),
@@ -67,19 +67,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 : Colors.white,
           )),
       actions: [
-        IconButton(
-          icon: Icon(
-            Provider.of<ThemeProvider>(context).isDarkMode
-                ? Icons.light_mode
-                : Icons.dark_mode,
-            color: theme.brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-          ),
-          onPressed: () {
-            Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
-          },
-        ),
         IconButton(
           icon: ColorFiltered(
             colorFilter: ColorFilter.mode(
@@ -188,20 +175,20 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   BottomNavigationBar _buildBottomNavigationBar() {
     final theme = Theme.of(context);
     return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
+      items: <BottomNavigationBarItem>[
+        const BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Home',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag_outlined),
           label: 'Cart',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag),
-          label: 'Profile',
+          label: 'Orders',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Profile',
         ),
@@ -221,6 +208,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       MaterialPageRoute(builder: (context) => LoginScreen()),
       (Route<dynamic> route) => false,
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 }
 
