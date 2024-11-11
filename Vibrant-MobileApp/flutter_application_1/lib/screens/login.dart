@@ -8,6 +8,8 @@ import '../global.dart';
 import './Customer/customerDashboard.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -16,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   String _email = '';
   String _password = '';
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool _passwordVisible = false; // Visibility toggle for password
   String _connectionStatus = ''; // To display the connection status
   late Connectivity _connectivity;
@@ -61,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _startStatusTimer() {
     _statusTimer?.cancel();
-    _statusTimer = Timer(Duration(seconds: 3), () {
+    _statusTimer = Timer(const Duration(seconds: 3), () {
       setState(() {
         _connectionStatus = '';
       });
@@ -73,20 +75,23 @@ class _LoginScreenState extends State<LoginScreen> {
       final url = Uri.parse('$API_BASE_URL/login');
       print('Attempting to connect to: $url'); // Debug URL
 
-      final response = await http.post(
+      final response = await http
+          .post(
         url,
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",  // Add this header
+          "Accept": "application/json", // Add this header
         },
         body: json.encode({
           'email': _email,
           'password': _password,
         }),
-      ).timeout(
-        const Duration(seconds: 30),  // Increase timeout
+      )
+          .timeout(
+        const Duration(seconds: 30), // Increase timeout
         onTimeout: () {
-          throw TimeoutException('Connection timed out. Please check your internet connection.');
+          throw TimeoutException(
+              'Connection timed out. Please check your internet connection.');
         },
       );
 
@@ -114,10 +119,12 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } on SocketException catch (e) {
       print('Socket Error: $e');
-      showSnackbarMessage(context, 'Connection error. Please check your internet and server.', false);
+      showSnackbarMessage(context,
+          'Connection error. Please check your internet and server.', false);
     } on TimeoutException catch (e) {
       print('Timeout Error: $e');
-      showSnackbarMessage(context, 'Connection timed out. Please try again.', false);
+      showSnackbarMessage(
+          context, 'Connection timed out. Please try again.', false);
     } catch (e) {
       print('General Error: $e');
       showSnackbarMessage(context, 'An error occurred: $e', false);
@@ -134,7 +141,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Background Image
@@ -150,11 +160,11 @@ class _LoginScreenState extends State<LoginScreen> {
               left: 20,
               right: 20,
               child: Container(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
                       blurRadius: 10,
@@ -164,14 +174,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: Text(
                   _connectionStatus,
-                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  style: theme.textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),
               ),
             ),
           Column(
             children: [
-              Spacer(), // Push the content to the bottom
+              const Spacer(), // Push the content to the bottom
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
@@ -185,10 +195,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         // Email Field
-                        Text(
+                        const Text(
                           'Email Address',
                           style: TextStyle(
                               fontSize: 16,
@@ -198,12 +208,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextFormField(
                           decoration: InputDecoration(
                             hintText: 'Enter email address',
-                            hintStyle: TextStyle(color: Colors.grey),
+                            hintStyle: const TextStyle(color: Colors.grey),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
+                              borderSide: const BorderSide(
                                   color:
                                       Colors.grey), // Set border color to grey
                             ),
@@ -220,10 +230,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         // Password Field
-                        Text(
+                        const Text(
                           'Password',
                           style: TextStyle(
                               fontSize: 16,
@@ -233,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextFormField(
                           decoration: InputDecoration(
                             hintText: 'Enter Password',
-                            hintStyle: TextStyle(color: Colors.grey),
+                            hintStyle: const TextStyle(color: Colors.grey),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
@@ -266,18 +276,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         // Login Button
                         _isLoading
-                            ? Center(child: CircularProgressIndicator())
+                            ? const Center(child: CircularProgressIndicator())
                             : SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
                                         Colors.black, // Black for button
-                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -287,12 +298,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       loginUser();
                                     }
                                   },
-                                  child: Text('LOG IN',
+                                  child: const Text('LOG IN',
                                       style: TextStyle(
                                           fontSize: 16, color: Colors.white)),
                                 ),
                               ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         // Register Now Text
                         SizedBox(
@@ -303,7 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   context, '/register');
                             },
                             child: RichText(
-                              text: TextSpan(
+                              text: const TextSpan(
                                 text: "Don't have an account? ",
                                 style: TextStyle(color: Colors.black),
                                 children: [
@@ -324,7 +335,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 16), // Add space at the bottom
+              const SizedBox(height: 16), // Add space at the bottom
             ],
           ),
         ],

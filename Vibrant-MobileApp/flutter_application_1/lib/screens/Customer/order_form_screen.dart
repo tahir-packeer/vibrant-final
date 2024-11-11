@@ -8,7 +8,8 @@ class OrderFormScreen extends StatefulWidget {
   final String productName;
   final int availableQuantity;
 
-  OrderFormScreen({
+  const OrderFormScreen({
+    super.key,
     required this.productId,
     required this.productName,
     required this.availableQuantity,
@@ -42,7 +43,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       isSubmitting = true;
     });
 
-    final String apiUrl = "${API_BASE_URL}/orders";
+    const String apiUrl = "$API_BASE_URL/orders/bulk/cart";
 
     try {
       final response = await http.post(
@@ -51,13 +52,18 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           'Content-Type': 'application/json',
         },
         body: json.encode({
-          "product_id": widget.productId,
-          "product_qty": productQty,
-          "user_id": globalUserId, // Assume you have the globalUserId from global.dart
-          "user_name": userName,
-          "user_address": userAddress,
-          "payment_status": "Pending",
-          "order_status": "Order Placed",
+          'user_id': globalUserId,
+          'user_name': userName,
+          'user_address': userAddress,
+          'payment_status': 'Paid',
+          'order_status': 'Order Placed',
+          'products': [
+            {
+              'product_id': widget.productId,
+              'product_name': widget.productName,
+              'product_qty': productQty,
+            }
+          ],
         }),
       );
 
@@ -67,13 +73,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         ));
         Navigator.pop(context); // Go back after order is placed
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Failed to place the order. Please try again."),
         ));
       }
     } catch (error) {
       print("Error placing order: $error");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Error placing the order."),
       ));
     }
@@ -85,7 +91,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
   // Function to fetch product details by product ID
   Future<Map<String, dynamic>?> _fetchProductDetails(int productId) async {
-    final String productApiUrl = "${API_BASE_URL}/products/$productId";
+    final String productApiUrl = "$API_BASE_URL/products/$productId";
 
     print("Fetching product details from: $productApiUrl");
 
@@ -107,7 +113,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           return null;
         }
       } else {
-        print("Failed to load product details. Status Code: ${response.statusCode}");
+        print(
+            "Failed to load product details. Status Code: ${response.statusCode}");
         return null;
       }
     } catch (error) {
@@ -125,7 +132,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     final productDetails = await _fetchProductDetails(widget.productId);
     if (productDetails == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to fetch product details")),
+        const SnackBar(content: Text("Failed to fetch product details")),
       );
       setState(() {
         isAddingToCart = false;
@@ -133,7 +140,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       return;
     }
 
-    final String addToCartApiUrl = "${API_BASE_URL}/add-to-cart";
+    const String addToCartApiUrl = "$API_BASE_URL/add-to-cart";
     final double itemPrice = double.parse(productDetails['item_price']);
     final double totalPrice = itemPrice * productQty;
     final productImage = productDetails['image'];
@@ -151,24 +158,25 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           'item_price': itemPrice.toString(),
           'product_qty': productQty.toString(),
           'total_price': totalPrice.toString(),
-          'user_id': globalUserId.toString(), // Assume globalUserId from global.dart
+          'user_id':
+              globalUserId.toString(), // Assume globalUserId from global.dart
         }),
       );
 
       print("Response body cart: ${response.body}");
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Product added to the cart")),
+          const SnackBar(content: Text("Product added to the cart")),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to add product to cart")),
+          const SnackBar(content: Text("Failed to add product to cart")),
         );
       }
     } catch (error) {
       print("Error adding to cart: $error");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error adding product to cart")),
+        const SnackBar(content: Text("Error adding product to cart")),
       );
     }
 
@@ -181,7 +189,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Order Form"),
+        title: const Text("Order Form"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -190,10 +198,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Product: ${widget.productName}", style: TextStyle(fontSize: 20)),
-              SizedBox(height: 20),
+              Text("Product: ${widget.productName}",
+                  style: const TextStyle(fontSize: 20)),
+              const SizedBox(height: 20),
               TextFormField(
-                decoration: InputDecoration(labelText: "Your Name"),
+                decoration: const InputDecoration(labelText: "Your Name"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your name';
@@ -206,9 +215,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   });
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
-                decoration: InputDecoration(labelText: "Your Address"),
+                decoration: const InputDecoration(labelText: "Your Address"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your address';
@@ -221,10 +230,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   });
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               DropdownButtonFormField<int>(
                 value: productQty,
-                decoration: InputDecoration(labelText: "Quantity"),
+                decoration: const InputDecoration(labelText: "Quantity"),
                 items: List.generate(widget.availableQuantity, (index) {
                   int quantity = index + 1;
                   return DropdownMenuItem<int>(
@@ -238,32 +247,32 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   });
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Card Details Section
               _buildCardDetailsSection(),
 
-              Spacer(),
+              const Spacer(),
               ElevatedButton(
                 onPressed: isSubmitting ? null : _submitOrder,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  minimumSize: const Size(double.infinity, 50),
+                ),
                 child: isSubmitting
                     ? CircularProgressIndicator()
                     : Text("Place Order"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  minimumSize: Size(double.infinity, 50),
-                ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: isAddingToCart ? null : _addToCart,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  minimumSize: const Size(double.infinity, 50),
+                ),
                 child: isAddingToCart
                     ? CircularProgressIndicator()
                     : Text("Add to Cart"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  minimumSize: Size(double.infinity, 50),
-                ),
               ),
             ],
           ),
@@ -276,23 +285,24 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Payment Details", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
+        const Text("Payment Details",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
 
         // Card Type Selector
         Row(
           children: [
             _buildCardTypeOption("Visa"),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             _buildCardTypeOption("MasterCard"),
           ],
         ),
 
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         TextFormField(
           controller: cardNumberController,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: "Card Number",
             prefixIcon: Icon(Icons.credit_card),
             border: OutlineInputBorder(),
@@ -304,10 +314,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             return null;
           },
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         TextFormField(
           controller: cardNameController,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: "Card Holder Name",
             prefixIcon: Icon(Icons.person),
             border: OutlineInputBorder(),
@@ -319,13 +329,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             return null;
           },
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Row(
           children: [
             Expanded(
               child: TextFormField(
                 controller: cardExpiryController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Expiry Date",
                   hintText: "MM/YY",
                   prefixIcon: Icon(Icons.date_range),
@@ -339,11 +349,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 },
               ),
             ),
-            SizedBox(width: 20),
+            const SizedBox(width: 20),
             Expanded(
               child: TextFormField(
                 controller: cardCvvController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "CVV",
                   hintText: "123",
                   prefixIcon: Icon(Icons.lock),
@@ -377,7 +387,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             cardType == "Visa" ? Icons.credit_card : Icons.credit_card_outlined,
             color: selectedCardType == cardType ? Colors.blue : Colors.grey,
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Text(
             cardType,
             style: TextStyle(

@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:battery_plus/battery_plus.dart'; // Battery package
-import 'package:image_picker/image_picker.dart';  // Image picker package
+import 'package:image_picker/image_picker.dart'; // Image picker package
 import 'package:provider/provider.dart';
 import '../../custom_colors.dart';
 import '../../global.dart';
@@ -15,6 +15,8 @@ import '../../theme_provider.dart';
 import '../login.dart'; // Import the login screen
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
@@ -31,7 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? userProfile;
 
   // Battery related
-  Battery _battery = Battery();
+  final Battery _battery = Battery();
   int _batteryLevel = 0;
 
   // Image picker instance
@@ -45,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> fetchUserProfile() async {
-    final String apiUrl = "${API_BASE_URL}/user/$globalUserId";
+    final String apiUrl = "$API_BASE_URL/user/$globalUserId";
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
@@ -55,7 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           nameController.text = profileData['name'];
           emailController.text = profileData['email'];
 
-          if (profileData['profile_image'] != null && profileData['profile_image'].isNotEmpty) {
+          if (profileData['profile_image'] != null &&
+              profileData['profile_image'].isNotEmpty) {
             _profileImage = File(profileData['profile_image']);
           }
           isLoading = false;
@@ -81,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       base64Image = await _convertImageToBase64(_profileImage!);
     }
 
-    final String updateUrl = "${API_BASE_URL}/users/update/$globalUserId";
+    final String updateUrl = "$API_BASE_URL/users/update/$globalUserId";
     try {
       final response = await http.put(
         Uri.parse(updateUrl),
@@ -89,7 +92,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         body: json.encode({
           "name": nameController.text,
           "email": emailController.text,
-          "profile_image": base64Image, // Include Base64 image string in the request
+          "profile_image":
+              base64Image, // Include Base64 image string in the request
         }),
       );
 
@@ -103,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update profile')),
+          const SnackBar(content: Text('Failed to update profile')),
         );
       }
     } catch (error) {
@@ -162,7 +166,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // Define a unique file name, for example, based on timestamp
       final fileName = path.basename(imageFile.path); // Extract filename
-      final filePath = path.join(directory.path, fileName); // Create full file path
+      final filePath =
+          path.join(directory.path, fileName); // Create full file path
 
       // Copy the file to the app's documents directory
       final savedImage = await File(imageFile.path).copy(filePath);
@@ -181,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _logout(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginScreen()),
-          (Route<dynamic> route) => false,
+      (Route<dynamic> route) => false,
     );
   }
 
@@ -193,24 +198,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkTheme = themeProvider.isDarkTheme;
+    final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Profile',
           style: TextStyle(
-            color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+            color: theme.appBarTheme.foregroundColor,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: isDarkTheme ? CustomColors.primaryColorDark : CustomColors.primaryColorLight,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         actions: [
           IconButton(
             icon: Icon(isEditing ? Icons.check : Icons.edit),
-            color: isDarkTheme ? CustomColors.textColorDark : CustomColors.textColorLight,
+            color: theme.appBarTheme.foregroundColor,
             onPressed: () {
               if (isEditing) {
                 updateUserProfile(); // Call the update function
@@ -224,133 +229,137 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  _showImageSourceDialog(context);
-                },
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage: _profileImage != null
-                      ? (_profileImage!.existsSync()
-                      ? FileImage(_profileImage!)
-                      : NetworkImage("http://10.0.2.2:8000${userProfile!['profile_image']}"))
-                      : AssetImage('assets/default_profile.png') as ImageProvider,
-                  child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: Icon(
-                      Icons.camera_alt_outlined,
-                      size: 28,
-                      color: Colors.grey[600],
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        _showImageSourceDialog(context);
+                      },
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: _profileImage != null
+                            ? (_profileImage!.existsSync()
+                                ? FileImage(_profileImage!)
+                                : NetworkImage(
+                                    "http://10.0.2.2:8000${userProfile!['profile_image']}"))
+                            : const AssetImage('assets/default_profile.png')
+                                as ImageProvider,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Icon(
+                            Icons.camera_alt_outlined,
+                            size: 28,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Name",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            TextFormField(
-              controller: nameController,
-              enabled: isEditing,
-              decoration: InputDecoration(
-                hintText: 'Enter your name',
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Email",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            TextFormField(
-              controller: emailController,
-              enabled: isEditing,
-              decoration: InputDecoration(
-                hintText: 'Enter your email',
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              "User Type: ${userProfile!['user_type']}",
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 10),
-            Text(
-              "Joined: ${userProfile!['created_at']}",
-              style: TextStyle(fontSize: 16),
-            ),
-            Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.battery_full),
-                SizedBox(width: 10),
-                Text("Battery Level: $_batteryLevel%"),
-              ],
-            ),
-            SizedBox(height: 20),
-            if (isEditing)
-              ElevatedButton(
-                onPressed: isSubmitting
-                    ? null
-                    : () {
-                  updateUserProfile();
-                },
-                child: isSubmitting
-                    ? CircularProgressIndicator()
-                    : Text("Save Changes"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Name",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
-              ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  _logout(context);
-                },
-                child: Text(
-                  "LOG OUT",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isDarkTheme ? Colors.black : Colors.white,
+                  TextFormField(
+                    controller: nameController,
+                    enabled: isEditing,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your name',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                   ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isDarkTheme ? Colors.white : Colors.black, // Change color based on theme
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Email",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
+                  TextFormField(
+                    controller: emailController,
+                    enabled: isEditing,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your email',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "User Type: ${userProfile!['user_type']}",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Joined: ${userProfile!['created_at']}",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.battery_full),
+                      const SizedBox(width: 10),
+                      Text("Battery Level: $_batteryLevel%"),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  if (isEditing)
+                    ElevatedButton(
+                      onPressed: isSubmitting
+                          ? null
+                          : () {
+                              updateUserProfile();
+                            },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 32),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: isSubmitting
+                          ? CircularProgressIndicator()
+                          : Text("Save Changes"),
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _logout(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme
+                            .cardTheme.color, // Change color based on theme
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        "LOG OUT",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -361,7 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0), // Rounded corners
         ),
-        title: Text(
+        title: const Text(
           "Select Image Source",
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -374,7 +383,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pop(context);
               _captureImageFromCamera();
             },
-            child: Text(
+            child: const Text(
               "Camera",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -386,7 +395,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pop(context);
               _pickImageFromGallery();
             },
-            child: Text(
+            child: const Text(
               "Gallery",
               style: TextStyle(
                 fontWeight: FontWeight.bold,

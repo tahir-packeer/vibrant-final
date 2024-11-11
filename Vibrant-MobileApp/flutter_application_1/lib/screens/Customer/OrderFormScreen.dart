@@ -181,7 +181,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     horizontal: 50, vertical: 15),
                 textStyle: const TextStyle(fontSize: 16),
               ),
-              child: Text("Place Order"),
+              child: const Text("Place Order"),
             ),
           ],
         ),

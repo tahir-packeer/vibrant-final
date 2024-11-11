@@ -9,21 +9,25 @@ import 'profile_screen.dart';
 import '../../global.dart';
 import 'cart_screen.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
+import '../../providers/theme_provider.dart';
 
 class CustomerDashboard extends StatefulWidget {
+  const CustomerDashboard({super.key});
+
   @override
-  _CustomerDashboardState createState() => _CustomerDashboardState();
+  State<CustomerDashboard> createState() => _CustomerDashboardState();
 }
 
 class _CustomerDashboardState extends State<CustomerDashboard> {
   int _selectedIndex = 0;
   bool _isDarkMode = false;
 
-  static List<Widget> _screens = <Widget>[
-    CustomerDashboardContent(),
-    CartScreen(),
-    OrdersListScreen(),
-    ProfileScreen(),
+  static final List<Widget> _screens = <Widget>[
+    const CustomerDashboardContent(),
+    const CartScreen(),
+    const OrdersListScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -34,9 +38,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     var orientation = MediaQuery.of(context).orientation;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: _buildAppBar(context),
       body: _screens[_selectedIndex],
       drawer: orientation == Orientation.landscape ? _buildDrawer() : null,
@@ -47,23 +54,38 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   }
 
   AppBar _buildAppBar(BuildContext context) {
+    final theme = Theme.of(context);
     return AppBar(
-      title: Text("Vibrant", style: TextStyle(fontWeight: FontWeight.bold)),
+      backgroundColor: theme.brightness == Brightness.light
+          ? Colors.white
+          : theme.appBarTheme.backgroundColor,
+      title: Text("Vibrant",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: theme.brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+          )),
       actions: [
         IconButton(
-          icon: Icon(_isDarkMode ? Icons.brightness_2_outlined : Icons.sunny),
+          icon: Icon(
+            Provider.of<ThemeProvider>(context).isDarkMode
+                ? Icons.light_mode
+                : Icons.dark_mode,
+            color: theme.brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+          ),
           onPressed: () {
-            setState(() {
-              _isDarkMode = !_isDarkMode;
-            });
+            Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
           },
         ),
         IconButton(
           icon: ColorFiltered(
             colorFilter: ColorFilter.mode(
-              _isDarkMode
-                  ? CustomColors.primaryColorLight
-                  : CustomColors.primaryColorDark,
+              theme.brightness == Brightness.light
+                  ? CustomColors.primaryColorDark
+                  : CustomColors.primaryColorLight,
               BlendMode.srcIn,
             ),
             child: Image.asset(
@@ -102,8 +124,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Home'),
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
             onTap: () {
               setState(() {
                 _selectedIndex = 0;
@@ -112,8 +134,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.shopping_bag_outlined),
-            title: Text('Cart'),
+            leading: const Icon(Icons.shopping_bag_outlined),
+            title: const Text('Cart'),
             onTap: () {
               setState(() {
                 _selectedIndex = 1;
@@ -122,8 +144,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.shopping_bag),
-            title: Text('Orders'),
+            leading: const Icon(Icons.shopping_bag),
+            title: const Text('Orders'),
             onTap: () {
               setState(() {
                 _selectedIndex = 2;
@@ -132,8 +154,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Profile'),
+            leading: const Icon(Icons.person),
+            title: const Text('Profile'),
             onTap: () {
               setState(() {
                 _selectedIndex = 3;
@@ -151,7 +173,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       primarySwatch: Colors.blue,
       brightness: Brightness.light,
       scaffoldBackgroundColor: Colors.white,
-      appBarTheme: AppBarTheme(elevation: 0),
+      appBarTheme: const AppBarTheme(elevation: 0),
     );
   }
 
@@ -164,6 +186,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   }
 
   BottomNavigationBar _buildBottomNavigationBar() {
+    final theme = Theme.of(context);
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
@@ -176,7 +199,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag),
-          label: 'Orders',
+          label: 'Profile',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
@@ -184,9 +207,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         ),
       ],
       currentIndex: _selectedIndex,
-      unselectedItemColor: Colors.grey,
-      selectedItemColor: _isDarkMode
-          ? CustomColors.primaryColor
+      unselectedItemColor:
+          theme.brightness == Brightness.dark ? Colors.white70 : Colors.grey,
+      selectedItemColor: theme.brightness == Brightness.dark
+          ? Colors.white
           : CustomColors.primaryColorDark,
       onTap: _onItemTapped,
     );
@@ -201,6 +225,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 }
 
 class CustomerDashboardContent extends StatefulWidget {
+  const CustomerDashboardContent({super.key});
+
   @override
   _CustomerDashboardContentState createState() =>
       _CustomerDashboardContentState();
@@ -212,7 +238,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   List<dynamic> promotionalProducts = [];
   bool isLoading = true;
   String searchQuery = "";
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   int _currentPromotionIndex = 0;
   Timer? _promotionTimer;
   double _opacity = 1.0; // Opacity for fade effect
@@ -232,14 +258,14 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   }
 
   void _startPromotionTimer() {
-    _promotionTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _promotionTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       // Fade out to a higher opacity
       setState(() {
         _opacity = 0.7; // Change this value to adjust the opacity
       });
 
       // Delay for the fade out
-      Future.delayed(Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 500), () {
         // Increment the promotion index
         if (_currentPromotionIndex < promotionalProducts.length - 1) {
           _currentPromotionIndex++;
@@ -250,12 +276,12 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
         // Animate to the next page with sliding effect
         _pageController.animateToPage(
           _currentPromotionIndex,
-          duration: Duration(milliseconds: 1100), // Slower transition
+          duration: const Duration(milliseconds: 1100), // Slower transition
           curve: Curves.easeInOut,
         );
 
         // Fade in
-        Future.delayed(Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(milliseconds: 500), () {
           setState(() {
             _opacity = 1.0; // Fade back to fully visible
           });
@@ -265,7 +291,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   }
 
   Future<void> fetchProducts() async {
-    final String apiUrl = "${API_BASE_URL}/products";
+    const String apiUrl = "$API_BASE_URL/products";
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
@@ -318,23 +344,23 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSearchBar(),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             if (promotionalProducts.isNotEmpty) ...[
-              Text(
+              const Text(
                 'Promotions',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 8.0),
               _buildPromotionSlider(),
             ],
-            SizedBox(height: 16.0),
-            Text(
+            const SizedBox(height: 16.0),
+            const Text(
               'Products',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : _buildProductGrid(orientation),
           ],
         ),
@@ -347,7 +373,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
       decoration: InputDecoration(
         labelText: 'Search Products',
         labelStyle: TextStyle(color: Colors.grey.shade600),
-        prefixIcon: Icon(Icons.search),
+        prefixIcon: const Icon(Icons.search),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50.0),
           borderSide: BorderSide.none,
@@ -360,7 +386,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
   }
 
   Widget _buildPromotionSlider() {
-    return Container(
+    return SizedBox(
       height: 250,
       child: PageView.builder(
         controller: _pageController,
@@ -374,8 +400,8 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
           var product = promotionalProducts[index];
           return AnimatedOpacity(
             opacity: _opacity,
-            duration:
-                Duration(milliseconds: 500), // Duration of the fade effect
+            duration: const Duration(
+                milliseconds: 500), // Duration of the fade effect
             child: _buildPromotionCard(product),
           );
         },
@@ -396,7 +422,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
         );
       },
       child: Card(
-        margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
         elevation: 4,
         child: Stack(
           children: [
@@ -407,7 +433,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                   "http://10.0.2.2:8000${product['image']}",
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return Center(child: Icon(Icons.broken_image));
+                    return const Center(child: Icon(Icons.broken_image));
                   },
                 ),
               ),
@@ -432,26 +458,26 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 children: [
                   Text(
                     product['name'],
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8.0),
+                  const SizedBox(height: 8.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "\Rs ${product['item_price']?.toString() ?? '0.00'}",
+                        "Rs ${product['item_price']?.toString() ?? '0.00'}",
                         style: TextStyle(
                           decoration: TextDecoration.lineThrough,
                           color: Colors.grey[300],
                         ),
                       ),
                       Text(
-                        "Promo: \Rs ${product['promotion_price']?.toString() ?? '0.00'}",
-                        style: TextStyle(
+                        "Promo: Rs ${product['promotion_price']?.toString() ?? '0.00'}",
+                        style: const TextStyle(
                           color: Colors.green,
                           fontWeight: FontWeight.bold,
                           fontSize: 16.0,
@@ -470,9 +496,9 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
 
   Widget _buildProductGrid(Orientation orientation) {
     return filteredProducts.isEmpty
-        ? Center(child: Text('No products found.'))
+        ? const Center(child: Text('No products found.'))
         : GridView.builder(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
@@ -495,10 +521,10 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
         : null;
     bool hasValidPromo =
         promoPrice != null && promoPrice > 0 && promoPrice < originalPrice;
-    double displayPrice = hasValidPromo ? promoPrice! : originalPrice;
+    double displayPrice = hasValidPromo ? promoPrice : originalPrice;
 
     double discountPercent = hasValidPromo
-        ? ((originalPrice - promoPrice!) / originalPrice * 100)
+        ? ((originalPrice - promoPrice) / originalPrice * 100)
         : 0;
 
     return GestureDetector(
@@ -513,7 +539,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
         );
       },
       child: Card(
-        margin: EdgeInsets.all(4.0),
+        margin: const EdgeInsets.all(4.0),
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
@@ -528,7 +554,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 height: double.infinity,
                 width: double.infinity,
                 errorBuilder: (context, error, stackTrace) {
-                  return Center(child: Icon(Icons.broken_image));
+                  return const Center(child: Icon(Icons.broken_image));
                 },
               ),
             ),
@@ -552,7 +578,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 children: [
                   Text(
                     product['name'],
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 18.0,
@@ -560,13 +586,13 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4.0),
+                  const SizedBox(height: 4.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "\Rs ${displayPrice.toStringAsFixed(2)}",
-                        style: TextStyle(
+                        "Rs ${displayPrice.toStringAsFixed(2)}",
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16.0,
@@ -574,7 +600,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                       ),
                       if (hasValidPromo)
                         Text(
-                          "\Rs ${originalPrice.toStringAsFixed(2)}",
+                          "Rs ${originalPrice.toStringAsFixed(2)}",
                           style: TextStyle(
                             color: Colors.grey[300],
                             decoration: TextDecoration.lineThrough,
@@ -583,7 +609,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                         ),
                     ],
                   ),
-                  Row(
+                  const Row(
                     children: [
                       Icon(Icons.star, color: Colors.amber, size: 16.0),
                       SizedBox(width: 4.0),
@@ -601,14 +627,15 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                 top: 8.0,
                 left: 8.0,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 4.0),
                   decoration: BoxDecoration(
                     color: Colors.green,
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                   child: Text(
                     "${discountPercent.toStringAsFixed(0)}% OFF",
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 12.0,

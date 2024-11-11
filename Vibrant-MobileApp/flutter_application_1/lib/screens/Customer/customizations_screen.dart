@@ -6,6 +6,8 @@ import 'package:geolocator/geolocator.dart';
 import '../../global.dart';
 
 class CustomizationsScreen extends StatefulWidget {
+  const CustomizationsScreen({super.key});
+
   @override
   _CustomizationsScreenState createState() => _CustomizationsScreenState();
 }
@@ -17,7 +19,7 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
 
   // Function to fetch all customizations for a user
   Future<void> fetchCustomizations() async {
-    final String apiUrl = "${API_BASE_URL}/customizations/$globalUserId";
+    final String apiUrl = "$API_BASE_URL/customizations/$globalUserId";
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
@@ -38,7 +40,7 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
 
   // Function to fetch pending payment customizations
   Future<void> fetchPendingPayments() async {
-    final String apiUrl = "${API_BASE_URL}/customizations/$globalUserId/pending-payment";
+    final String apiUrl = "$API_BASE_URL/customizations/$globalUserId/pending-payment";
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
@@ -55,7 +57,7 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
 
   // Function to confirm payment for a customization
   Future<void> confirmPayment(int customizationId) async {
-    final String apiUrl = "${API_BASE_URL}/customizations/$customizationId/confirm-payment";
+    final String apiUrl = "$API_BASE_URL/customizations/$customizationId/confirm-payment";
     try {
       final response = await http.put(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
@@ -69,7 +71,7 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
     } catch (error) {
       print(error);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred while confirming payment.')),
+        const SnackBar(content: Text('An error occurred while confirming payment.')),
       );
     }
   }
@@ -109,7 +111,7 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
   // Function to create a new customization with geolocation
   Future<void> createCustomization(
       String title, String description, int quantity, String note, String? filePath) async {
-    final String apiUrl = "${API_BASE_URL}/customizations";
+    const String apiUrl = "$API_BASE_URL/customizations";
 
     try {
       // Get the user's location before creating the customization
@@ -135,7 +137,7 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
       final response = await request.send();
 
       if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Customization created successfully'),
         ));
         fetchCustomizations(); // Refresh the list of customizations
@@ -145,7 +147,7 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
     } catch (error) {
       print('Error creating customization: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create customization')),
+        const SnackBar(content: Text('Failed to create customization')),
       );
     }
   }
@@ -161,10 +163,10 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Customizations"),
+        title: const Text("Customizations"),
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -173,10 +175,10 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
               onPressed: () {
                 _showCreateCustomizationDialog();
               },
-              child: Text("Create Customization"),
+              child: const Text("Create Customization"),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               "Pending Payment Customizations",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -205,14 +207,14 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
                       onPressed: () {
                         confirmPayment(customization['id']);
                       },
-                      child: Text("Confirm Payment"),
+                      child: const Text("Confirm Payment"),
                     ),
                   );
                 },
               ),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               "All Customizations",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -252,28 +254,28 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Create Customization"),
+          title: const Text("Create Customization"),
           content: SingleChildScrollView(
             child: Column(
               children: [
                 TextField(
                   controller: titleController,
-                  decoration: InputDecoration(labelText: 'Title'),
+                  decoration: const InputDecoration(labelText: 'Title'),
                 ),
                 TextField(
                   controller: descriptionController,
-                  decoration: InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(labelText: 'Description'),
                 ),
                 TextField(
                   controller: quantityController,
-                  decoration: InputDecoration(labelText: 'Quantity'),
+                  decoration: const InputDecoration(labelText: 'Quantity'),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
                   controller: noteController,
-                  decoration: InputDecoration(labelText: 'Note'),
+                  decoration: const InputDecoration(labelText: 'Note'),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () async {
                     // Use file_picker to select a file
@@ -293,13 +295,13 @@ class _CustomizationsScreenState extends State<CustomizationsScreen> {
           ),
           actions: [
             TextButton(
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text("Create"),
+              child: const Text("Create"),
               onPressed: () {
                 createCustomization(
                   titleController.text,

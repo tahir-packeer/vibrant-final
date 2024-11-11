@@ -5,6 +5,8 @@ import 'package:connectivity_plus/connectivity_plus.dart'; // Import connectivit
 import '../global.dart'; // import the global variables
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
@@ -14,7 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String _name = '';
   String _email = '';
   String _password = '';
-  String _userType = 'customer'; // Default user type is "customer"
+  final String _userType = 'customer'; // Default user type is "customer"
   final List<String> _userTypes = ['customer', 'admin'];
   bool _isLoading = false;
 
@@ -30,7 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _isLoading = true;
     });
 
-    final url = Uri.parse('${API_BASE_URL}/register');
+    final url = Uri.parse('$API_BASE_URL/register');
 
     try {
       final response = await http.post(
@@ -83,7 +85,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           Column(
             children: [
-              Spacer(), // Push the content to the bottom
+              const Spacer(), // Push the content to the bottom
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
@@ -98,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         // Name Field
-                        Text(
+                        const Text(
                           'Name',
                           style: TextStyle(
                               fontSize: 16,
@@ -108,12 +110,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         TextFormField(
                           decoration: InputDecoration(
                             hintText: 'Enter your name',
-                            hintStyle: TextStyle(color: Colors.grey),
+                            hintStyle: const TextStyle(color: Colors.grey),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey),
+                              borderSide: const BorderSide(color: Colors.grey),
                             ),
                           ),
                           onChanged: (value) {
@@ -122,10 +124,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             });
                           },
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         // Email Field
-                        Text(
+                        const Text(
                           'Email Address',
                           style: TextStyle(
                               fontSize: 16,
@@ -135,12 +137,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         TextFormField(
                           decoration: InputDecoration(
                             hintText: 'Enter email address',
-                            hintStyle: TextStyle(color: Colors.grey),
+                            hintStyle: const TextStyle(color: Colors.grey),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey),
+                              borderSide: const BorderSide(color: Colors.grey),
                             ),
                           ),
                           onChanged: (value) {
@@ -149,10 +151,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             });
                           },
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         // Password Field
-                        Text(
+                        const Text(
                           'Password',
                           style: TextStyle(
                               fontSize: 16,
@@ -162,7 +164,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         TextFormField(
                           decoration: InputDecoration(
                             hintText: 'Enter Password',
-                            hintStyle: TextStyle(color: Colors.grey),
+                            hintStyle: const TextStyle(color: Colors.grey),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
@@ -176,17 +178,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             });
                           },
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         // Register Button
                         _isLoading
-                            ? Center(child: CircularProgressIndicator())
+                            ? const Center(child: CircularProgressIndicator())
                             : SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black, // Match button style
-                              padding: EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -196,12 +198,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 registerUser();
                               }
                             },
-                            child: Text('REGISTER',
+                            child: const Text('REGISTER',
                                 style: TextStyle(
                                     fontSize: 16, color: Colors.white)),
                           ),
                         ),
-                        SizedBox(height: 20.0),
+                        const SizedBox(height: 20.0),
 
                         // Already have an account? Login
                         SizedBox(
@@ -213,7 +215,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: RichText(
                               text: TextSpan(
                                 text: "Already have an account? ",
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline),
@@ -236,7 +238,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 16), // Add space at the bottom
+              const SizedBox(height: 16), // Add space at the bottom
             ],
           ),
         ],
