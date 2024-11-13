@@ -72,26 +72,32 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> loginUser() async {
     try {
+      var connectivityResult = await (Connectivity().checkConnectivity());
+      print('Connectivity status: $connectivityResult');
+
       final url = Uri.parse('$API_BASE_URL/login');
-      print('Attempting to connect to: $url'); // Debug URL
+      print('Attempting to connect to: $url');
+
+      final requestBody = {
+        'email': _email,
+        'password': _password,
+      };
+      print('Request body: $requestBody');
 
       final response = await http
           .post(
         url,
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json", // Add this header
+          "Accept": "application/json",
         },
-        body: json.encode({
-          'email': _email,
-          'password': _password,
-        }),
+        body: json.encode(requestBody),
       )
           .timeout(
-        const Duration(seconds: 30), // Increase timeout
+        const Duration(seconds: 30),
         onTimeout: () {
-          throw TimeoutException(
-              'Connection timed out. Please check your internet connection.');
+          print('Connection timed out after 30 seconds');
+          throw TimeoutException('Connection timed out');
         },
       );
 
@@ -110,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // Navigate to dashboard based on user type
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => CustomerDashboard()),
+          MaterialPageRoute(builder: (context) => const CustomerDashboard()),
         );
       } else {
         final errorMessage =
@@ -118,15 +124,18 @@ class _LoginScreenState extends State<LoginScreen> {
         showSnackbarMessage(context, errorMessage, false);
       }
     } on SocketException catch (e) {
-      print('Socket Error: $e');
+      print('Socket Error Details: $e');
+      print('Error address: ${e.address}');
+      print('Error port: ${e.port}');
       showSnackbarMessage(context,
           'Connection error. Please check your internet and server.', false);
     } on TimeoutException catch (e) {
-      print('Timeout Error: $e');
+      print('Timeout Error Details: $e');
       showSnackbarMessage(
           context, 'Connection timed out. Please try again.', false);
     } catch (e) {
-      print('General Error: $e');
+      print('General Error Details: $e');
+      print('Error type: ${e.runtimeType}');
       showSnackbarMessage(context, 'An error occurred: $e', false);
     }
   }
@@ -142,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(

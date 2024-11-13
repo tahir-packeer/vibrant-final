@@ -1,5 +1,5 @@
-const String API_BASE_URL = "http://10.0.2.2:8000/api";
-
+// Replace with your deployed URL
+const String API_BASE_URL = "https://your-app-name.onrender.com/api";
 
 // Global user_id to be used across the app
 int? globalUserId;

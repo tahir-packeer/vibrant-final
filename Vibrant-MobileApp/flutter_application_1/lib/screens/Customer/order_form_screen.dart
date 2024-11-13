@@ -260,8 +260,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: isSubmitting
-                    ? CircularProgressIndicator()
-                    : Text("Place Order"),
+                    ? const CircularProgressIndicator()
+                    : const Text("Place Order"),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -271,8 +271,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: isAddingToCart
-                    ? CircularProgressIndicator()
-                    : Text("Add to Cart"),
+                    ? const CircularProgressIndicator()
+                    : const Text("Add to Cart"),
               ),
             ],
           ),

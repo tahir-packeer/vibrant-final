@@ -28,11 +28,11 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: 'Authentication App with Splash Screen',
             theme: themeProvider.currentTheme,
-            home: SplashScreen(),
+            home: const SplashScreen(),
             routes: {
-              '/login': (context) => LoginScreen(),
-              '/register': (context) => RegisterScreen(),
-              '/customerDashboard': (context) => CustomerDashboard(),
+              '/login': (context) => const LoginScreen(),
+              '/register': (context) => const RegisterScreen(),
+              '/customerDashboard': (context) => const CustomerDashboard(),
             },
           );
         },

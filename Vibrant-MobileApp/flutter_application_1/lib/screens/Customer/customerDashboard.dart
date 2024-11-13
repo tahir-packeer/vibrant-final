@@ -21,7 +21,7 @@ class CustomerDashboard extends StatefulWidget {
 
 class _CustomerDashboardState extends State<CustomerDashboard> {
   int _selectedIndex = 0;
-  bool _isDarkMode = false;
+  final bool _isDarkMode = false;
 
   List<Widget> get _screens => <Widget>[
         const CustomerDashboardContent(),
@@ -155,20 +155,20 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   BottomNavigationBar _buildBottomNavigationBar() {
     final theme = Theme.of(context);
     return BottomNavigationBar(
-      items: <BottomNavigationBarItem>[
-        const BottomNavigationBarItem(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Home',
         ),
-        const BottomNavigationBarItem(
+        BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag_outlined),
           label: 'Bag',
         ),
-        const BottomNavigationBarItem(
+        BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag),
           label: 'Orders',
         ),
-        const BottomNavigationBarItem(
+        BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Profile',
         ),
@@ -185,7 +185,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   void _logout(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
       (Route<dynamic> route) => false,
     );
   }
@@ -305,37 +305,58 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
     });
   }
 
+  Future<void> _onRefresh() async {
+    setState(() {
+      products = [];
+      filteredProducts = [];
+      promotionalProducts = [];
+      isLoading = true;
+      searchQuery = ""; // Reset search query
+    });
+    await fetchProducts();
+  }
+
   @override
   Widget build(BuildContext context) {
     var orientation = MediaQuery.of(context).orientation;
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSearchBar(),
-            const SizedBox(height: 16.0),
-            if (promotionalProducts.isNotEmpty) ...[
-              const Text(
-                'Promotions',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      child: SingleChildScrollView(
+        physics:
+            const AlwaysScrollableScrollPhysics(), // This ensures pull-to-refresh works
+        child: isLoading
+            ? SizedBox(
+                height: MediaQuery.of(context).size.height * 0.7,
+                child: const Center(child: CircularProgressIndicator()),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSearchBar(),
+                    const SizedBox(height: 16.0),
+                    if (promotionalProducts.isNotEmpty) ...[
+                      const Text(
+                        'Promotions',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8.0),
+                      _buildPromotionSlider(),
+                    ],
+                    const SizedBox(height: 16.0),
+                    const Text(
+                      'Products',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8.0),
+                    _buildProductGrid(orientation),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8.0),
-              _buildPromotionSlider(),
-            ],
-            const SizedBox(height: 16.0),
-            const Text(
-              'Products',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8.0),
-            isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _buildProductGrid(orientation),
-          ],
-        ),
       ),
     );
   }
@@ -402,7 +423,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10.0),
                 child: Image.network(
-                  "http://10.0.2.2:8000${product['image']}",
+                  "http://192.168.8.78:8000${product['image']}",
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return const Center(child: Icon(Icons.broken_image));
@@ -522,7 +543,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
             ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
               child: Image.network(
-                "http://10.0.2.2:8000${product['image']}",
+                "http://192.168.8.78:8000${product['image']}",
                 fit: BoxFit.cover,
                 height: double.infinity,
                 width: double.infinity,
@@ -609,22 +630,30 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Rs ${displayPrice.toStringAsFixed(2)}",
-                        style: TextStyle(
-                          color: isOutOfStock ? Colors.grey : Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
-                          decoration: isOutOfStock ? TextDecoration.lineThrough : null,
+                      Flexible(
+                        child: Text(
+                          "Rs ${displayPrice.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color: isOutOfStock ? Colors.grey : Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                            decoration: isOutOfStock
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (hasValidPromo)
-                        Text(
-                          "Rs ${originalPrice.toStringAsFixed(2)}",
-                          style: TextStyle(
-                            color: Colors.grey[300],
-                            decoration: TextDecoration.lineThrough,
-                            fontSize: 14.0,
+                        Flexible(
+                          child: Text(
+                            "Rs ${originalPrice.toStringAsFixed(2)}",
+                            style: TextStyle(
+                              color: Colors.grey[300],
+                              decoration: TextDecoration.lineThrough,
+                              fontSize: 14.0,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                     ],

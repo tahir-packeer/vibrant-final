@@ -154,7 +154,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           fit: StackFit.expand,
                           children: [
                             Image.network(
-                              "http://10.0.2.2:8000${product!['image'] ?? ''}",
+                              "http://192.168.8.78:8000${product!['image'] ?? ''}",
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return const Icon(Icons.broken_image,
@@ -220,7 +220,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                   children: [
                                     if (product!['promotion_price'] != null)
                                       Text(
-                                        "\Rs ${product!['promotion_price']}",
+                                        "Rs ${product!['promotion_price']}",
                                         style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
@@ -229,7 +229,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       ),
                                     if (product!['promotion_price'] != null)
                                       Text(
-                                        "\Rs ${product!['item_price']}",
+                                        "Rs ${product!['item_price']}",
                                         style: TextStyle(
                                           fontSize: 16,
                                           decoration:
@@ -241,7 +241,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       )
                                     else
                                       Text(
-                                        "\Rs ${product!['item_price']}",
+                                        "Rs ${product!['item_price']}",
                                         style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
@@ -383,6 +383,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                               : SizedBox(
                                                   width: 24,
                                                   height: 24,
+                                                  key:
+                                                      const ValueKey('loading'),
                                                   child:
                                                       CircularProgressIndicator(
                                                     color: isDarkMode
@@ -390,7 +392,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                                         : Colors.white,
                                                     strokeWidth: 2,
                                                   ),
-                                                  key: ValueKey('loading'),
                                                 )
                                           : Icon(
                                               Icons.shopping_cart,
@@ -398,7 +399,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                                   ? Colors.black
                                                   : Colors.white,
                                               size: 24,
-                                              key: ValueKey('cart'),
+                                              key: const ValueKey('cart'),
                                             ),
                                     ),
                                   ),
@@ -413,15 +414,30 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     OrderFormScreen(
-                                                  orderDetails: [{
-                                                    'product_id': widget.productId,
-                                                    'product_name': product!['name'],
-                                                    'product_image': product!['image'],
-                                                    'product_qty': 1,
-                                                    'item_price': product!['promotion_price'] ?? product!['item_price'],
-                                                    'total_price': product!['promotion_price'] ?? product!['item_price'],
-                                                  }],
-                                                  cartTotal: double.parse(product!['promotion_price']?.toString() ?? product!['item_price'].toString()),
+                                                  orderDetails: [
+                                                    {
+                                                      'product_id':
+                                                          widget.productId,
+                                                      'product_name':
+                                                          product!['name'],
+                                                      'product_image':
+                                                          product!['image'],
+                                                      'product_qty': 1,
+                                                      'item_price': product![
+                                                              'promotion_price'] ??
+                                                          product![
+                                                              'item_price'],
+                                                      'total_price': product![
+                                                              'promotion_price'] ??
+                                                          product![
+                                                              'item_price'],
+                                                    }
+                                                  ],
+                                                  cartTotal: double.parse(
+                                                      product!['promotion_price']
+                                                              ?.toString() ??
+                                                          product!['item_price']
+                                                              .toString()),
                                                 ),
                                               ),
                                             );

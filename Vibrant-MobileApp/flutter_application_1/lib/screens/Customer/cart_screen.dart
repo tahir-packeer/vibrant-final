@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-import '../../custom_colors.dart';
 import '../../global.dart';
 import 'OrderFormScreen.dart';
-import '/theme_provider.dart';
 
 // lib/screens/Customer/cart_screen.dart
 
@@ -106,6 +103,14 @@ class _CartScreenState extends State<CartScreen>
     }
   }
 
+  Future<void> _onRefresh() async {
+    // Reset and reload cart data
+    setState(() {
+      isLoading = true;
+    });
+    await fetchCartItems();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -138,24 +143,32 @@ class _CartScreenState extends State<CartScreen>
           ],
         ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : cartItems.isEmpty
-              ? Center(
-                  child: Text(
-                    'Your Bag is empty',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: theme.textTheme.bodyMedium?.color ?? Colors.black,
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : cartItems.isEmpty
+                ? SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.7,
+                      child: Center(
+                        child: Text(
+                          'Your Bag is empty',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: theme.textTheme.bodyMedium?.color ??
+                                Colors.black,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                )
-              : Column(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                  )
+                : Column(
+                    children: [
+                      Expanded(
                         child: ListView.builder(
+                          padding: const EdgeInsets.all(16.0),
                           itemCount: cartItems.length,
                           itemBuilder: (context, index) {
                             var cartItem = cartItems[index];
@@ -167,125 +180,139 @@ class _CartScreenState extends State<CartScreen>
                                 deleteCartItem(cartItem['id']);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                      content: Text(
-                                          "${cartItem['product_name']} removed from cart")),
+                                    content: Text(
+                                        "${cartItem['product_name']} removed from cart"),
+                                  ),
                                 );
                               },
-                              movementDuration:
-                                  const Duration(milliseconds: 500),
-                              resizeDuration: const Duration(milliseconds: 300),
                               child: _buildCartItemCard(cartItem, theme),
                             );
                           },
                         ),
                       ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: theme.cardTheme.color,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: const Offset(0, -3),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(16.0),
-                      child: SafeArea(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Total Amount:",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: theme.textTheme.bodyMedium?.color ??
-                                        Colors.black,
-                                  ),
-                                ),
-                                Text(
-                                  "Rs ${cartTotal.toStringAsFixed(2)}",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.textTheme.bodyMedium?.color ??
-                                        Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  List<Map<String, dynamic>> orderDetails =
-                                      cartItems.map((item) {
-                                    return {
-                                      'product_id': item['product_id'],
-                                      'product_name': item['product_name'],
-                                      'product_qty': item['product_qty'],
-                                    };
-                                  }).toList();
-
-                                  final result =
-                                      await Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => OrderFormScreen(
-                                        orderDetails: orderDetails,
-                                        cartTotal: cartTotal,
-                                      ),
-                                    ),
-                                  );
-
-                                  if (result == true) {
-                                    setState(() {
-                                      cartItems.clear();
-                                      cartTotal = 0.0;
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Order placed successfully. Cart cleared!'),
-                                      ),
-                                    );
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      theme.brightness == Brightness.dark
-                                          ? Colors.white
-                                          : Colors.black,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                child: Text(
-                                  "CHECKOUT",
-                                  style: TextStyle(
-                                    color: theme.brightness == Brightness.dark
-                                        ? Colors.black
-                                        : Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
+                      // Bottom total and checkout section
+                      Container(
+                        decoration: BoxDecoration(
+                          color: theme.cardTheme.color,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 5,
+                              offset: const Offset(0, -3),
                             ),
                           ],
                         ),
+                        padding: const EdgeInsets.all(16.0),
+                        child: SafeArea(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Total Amount:",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: theme.textTheme.bodyMedium?.color,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Rs ${cartTotal.toStringAsFixed(2)}",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.textTheme.bodyMedium?.color,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: cartItems.isEmpty
+                                      ? null // Disable button if cart is empty
+                                      : () async {
+                                          List<Map<String, dynamic>>
+                                              orderDetails =
+                                              cartItems.map((item) {
+                                            return {
+                                              'product_id': item['product_id'],
+                                              'product_name':
+                                                  item['product_name'],
+                                              'product_qty':
+                                                  item['product_qty'],
+                                              'product_image':
+                                                  item['product_image'],
+                                              'item_price': item['item_price'],
+                                              'total_price':
+                                                  item['total_price'],
+                                            };
+                                          }).toList();
+
+                                          final result = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  OrderFormScreen(
+                                                orderDetails: orderDetails,
+                                                cartTotal: cartTotal,
+                                              ),
+                                            ),
+                                          );
+
+                                          // If order was placed successfully, refresh the cart
+                                          if (result == true) {
+                                            setState(() {
+                                              cartItems.clear();
+                                              cartTotal = 0.0;
+                                            });
+                                            if (mounted) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                      'Order placed successfully!'),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                            }
+                                            await fetchCartItems(); // Refresh cart items
+                                          }
+                                        },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        theme.brightness == Brightness.dark
+                                            ? Colors.white
+                                            : Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: Text(
+                                    "CHECKOUT",
+                                    style: TextStyle(
+                                      color: theme.brightness == Brightness.dark
+                                          ? Colors.black
+                                          : Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+      ),
     );
   }
 
@@ -333,7 +360,7 @@ class _CartScreenState extends State<CartScreen>
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      "http://10.0.2.2:8000${cartItem['product_image']}",
+                      "http://192.168.8.78:8000${cartItem['product_image']}",
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,

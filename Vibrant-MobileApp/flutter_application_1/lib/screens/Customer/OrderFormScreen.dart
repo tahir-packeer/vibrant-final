@@ -239,87 +239,83 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                           ),
                         ),
                         const Divider(height: 30),
-                        ...widget.orderDetails
-                            .map((item) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 16.0),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          "http://10.0.2.2:8000${item['product_image']}",
+                        ...widget.orderDetails.map((item) => Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      "http://192.168.8.78:8000${item['product_image']}",
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        print("Error loading image: $error");
+                                        return Container(
                                           width: 60,
                                           height: 60,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            print(
-                                                "Error loading image: $error");
-                                            return Container(
-                                              width: 60,
-                                              height: 60,
-                                              decoration: BoxDecoration(
-                                                color: isDarkMode
-                                                    ? Colors.grey[800]
-                                                    : Colors.grey[200],
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Icon(
-                                                Icons.image_not_supported,
-                                                color: isDarkMode
-                                                    ? Colors.white60
-                                                    : Colors.grey[400],
-                                                size: 30,
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 15),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              item['product_name'] ??
-                                                  'Unknown Product',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: isDarkMode
-                                                    ? Colors.white
-                                                    : Colors.black87,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Qty: ${item['product_qty'] ?? '1'}',
-                                              style: TextStyle(
-                                                color: isDarkMode
-                                                    ? Colors.white70
-                                                    : Colors.grey[800],
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                            Text(
-                                              'Rs ${(double.tryParse(item['total_price']?.toString() ?? '0') ?? 0).toStringAsFixed(2)}',
-                                              style: const TextStyle(
-                                                color: Colors.green,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                          decoration: BoxDecoration(
+                                            color: isDarkMode
+                                                ? Colors.grey[800]
+                                                : Colors.grey[200],
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Icon(
+                                            Icons.image_not_supported,
+                                            color: isDarkMode
+                                                ? Colors.white60
+                                                : Colors.grey[400],
+                                            size: 30,
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
-                                ))
-                            .toList(),
+                                  const SizedBox(width: 15),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item['product_name'] ??
+                                              'Unknown Product',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Qty: ${item['product_qty'] ?? '1'}',
+                                          style: TextStyle(
+                                            color: isDarkMode
+                                                ? Colors.white70
+                                                : Colors.grey[800],
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Rs ${(double.tryParse(item['total_price']?.toString() ?? '0') ?? 0).toStringAsFixed(2)}',
+                                          style: const TextStyle(
+                                            color: Colors.green,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
                       ],
                     ),
                   ),
@@ -459,7 +455,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                             ),
                             Text(
                               'Rs ${widget.cartTotal.toStringAsFixed(2)}',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.green,

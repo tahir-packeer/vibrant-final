@@ -46,47 +46,75 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Detecting theme mode
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         iconTheme: IconThemeData(
-          color: isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight
-        ),
-        title: Text("Order Details", style: TextStyle(color: isDarkMode ? CustomColors.textColorDark : CustomColors.textColorLight)),
-        backgroundColor: isDarkMode ? CustomColors.primaryColorDark : CustomColors.primaryColor,
+            color: isDarkMode
+                ? CustomColors.textColorDark
+                : CustomColors.textColorLight),
+        title: Text("Order Details",
+            style: TextStyle(
+                color: isDarkMode
+                    ? CustomColors.textColorDark
+                    : CustomColors.textColorLight)),
+        backgroundColor: isDarkMode
+            ? CustomColors.primaryColorDark
+            : CustomColors.primaryColor,
         elevation: 0,
       ),
-      body: isLoading
-          ? Center(
-              child: CircularProgressIndicator(
-                  color: isDarkMode
-                      ? CustomColors.textColorDark
-                      : CustomColors.textColorLight))
-          : orderDetails == null
-              ? Center(
-                  child: Text("Failed to load order details",
-                      style: TextStyle(
-                          color: isDarkMode
-                              ? CustomColors.textColorDark
-                              : CustomColors.textColorLight)))
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildOrderCard(isDarkMode),
-                        const SizedBox(height: 20),
-                        _buildDelivererCard(isDarkMode),
-                        const SizedBox(height: 20),
-                        _buildProductCard(isDarkMode),
-                      ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            isLoading = true;
+            orderDetails = null;
+          });
+          await fetchOrderDetails();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: isLoading
+              ? SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: isDarkMode
+                          ? CustomColors.textColorDark
+                          : CustomColors.textColorLight,
                     ),
                   ),
-                ),
+                )
+              : orderDetails == null
+                  ? SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.7,
+                      child: Center(
+                        child: Text(
+                          "Failed to load order details",
+                          style: TextStyle(
+                            color: isDarkMode
+                                ? CustomColors.textColorDark
+                                : CustomColors.textColorLight,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildOrderCard(isDarkMode),
+                          const SizedBox(height: 20),
+                          _buildDelivererCard(isDarkMode),
+                          const SizedBox(height: 20),
+                          _buildProductCard(isDarkMode),
+                        ],
+                      ),
+                    ),
+        ),
+      ),
     );
   }
 
@@ -266,7 +294,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  "http://10.0.2.2:8000/${orderDetails!['order']['product']['image']}",
+                  "http://192.168.8.78:8000/${orderDetails!['order']['product']['image']}",
                   width: 150,
                   height: 150,
                   fit: BoxFit.cover,
@@ -293,7 +321,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 orderDetails!['order']['product']['category_name'], isDarkMode),
             _buildProductInfoRow(
                 "Price:",
-                "\$${orderDetails!['order']['product']['item_price']}",
+                "\Rs ${orderDetails!['order']['product']['item_price']}",
                 isDarkMode),
           ],
         ),

@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-import '../../providers/theme_provider.dart';
 import 'order_details_screen.dart';
 import '../../global.dart';
-import '../../custom_colors.dart';
 
 class OrdersListScreen extends StatefulWidget {
   const OrdersListScreen({super.key});
@@ -59,9 +56,18 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     }
   }
 
+  Future<void> _onRefresh() async {
+    // Reset and reload orders
+    setState(() {
+      isLoading = true;
+    });
+    await fetchOrders();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -91,28 +97,48 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
           ],
         ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : orders.isEmpty
-              ? Center(
-                  child: Text(
-                    "You have no orders",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: theme.textTheme.bodyLarge?.color ?? Colors.black,
-                    ),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ListView.builder(
-                    itemCount: orders.length,
-                    itemBuilder: (context, index) {
-                      var order = orders[index];
-                      return _buildOrderCard(order);
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : orders.isEmpty
+                ? LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Container(
+                          height: constraints.maxHeight,
+                          child: Center(
+                            child: Text(
+                              "You have no orders",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: theme.textTheme.bodyLarge?.color ??
+                                    Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SizedBox(
+                        height: constraints.maxHeight,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16.0),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: orders.length,
+                          itemBuilder: (context, index) {
+                            var order = orders[index];
+                            return _buildOrderCard(order);
+                          },
+                        ),
+                      );
                     },
                   ),
-                ),
+      ),
     );
   }
 
@@ -155,7 +181,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.network(
-                      "http://10.0.2.2:8000/${order['product']['image']}",
+                      "http://192.168.8.78:8000/${order['product']['image']}",
                       width: 100,
                       height: 100,
                       fit: BoxFit.cover,
