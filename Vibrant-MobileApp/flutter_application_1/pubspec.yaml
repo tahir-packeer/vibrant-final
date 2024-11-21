@@ -80,7 +80,7 @@ flutter:
     - assets/splashlogo.gif
     - assets/logo-splash.gif
     - assets/logout.png
-
+    - assets/default-profile.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

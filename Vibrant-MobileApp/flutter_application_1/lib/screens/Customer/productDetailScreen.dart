@@ -141,6 +141,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               : CustomScrollView(
                   slivers: [
                     SliverAppBar(
+                      title: Text(
+                        product!['name'],
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      centerTitle: true,
                       expandedHeight: 300,
                       pinned: true,
                       backgroundColor: isDarkMode

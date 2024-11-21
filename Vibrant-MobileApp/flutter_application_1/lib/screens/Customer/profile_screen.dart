@@ -308,7 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ? NetworkImage(
                                       "http://192.168.8.78:8000${userProfile!['profile_image']}")
                                   : const AssetImage(
-                                          'assets/default_profile.png')
+                                          'assets/default-profile.png')
                                       as ImageProvider,
                               child: userProfile == null ||
                                       userProfile!['profile_image'] == null ||
